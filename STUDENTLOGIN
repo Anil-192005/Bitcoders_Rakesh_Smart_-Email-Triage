@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Login</title>
+  <style>
+    :root {
+      font-family: Arial, sans-serif;
+      color: #222;
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #4facfe, #00f2fe);
+    }
+    .login-card {
+      width: min(360px, 90vw);
+      padding: 2.5rem 2rem;
+      border-radius: 1rem;
+      background: #fff;
+      box-shadow: 0 20px 45px rgba(0,0,0,0.15);
+    }
+    h1 {
+      margin: 0 0 1.5rem;
+      font-size: 1.5rem;
+      text-align: center;
+      color: #0d2a4c;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.35rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+    input {
+      width: 100%;
+      padding: 0.75rem 0.9rem;
+      margin-bottom: 1.1rem;
+      border: 1px solid #cfd6e4;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    input:focus {
+      outline: none;
+      border-color: #4facfe;
+      box-shadow: 0 0 0 3px rgba(79,172,254,0.25);
+    }
+    button {
+      width: 100%;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 0.85rem;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #fff;
+      background: #0f6fff;
+      cursor: pointer;
+      transition: transform 0.15s ease, opacity 0.15s ease;
+    }
+    button:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+    .helper-text {
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      text-align: center;
+      color: #526179;
+    }
+  </style>
+</head>
+<body>
+  <form class="login-card" id="login-form">
+    <h1>Student Portal</h1>
+    <label for="student-id">Student ID</label>
+    <input type="text" id="student-id" name="studentId" placeholder="Enter your ID" required>
+
+    <label for="password">Password</label>
+    <input type="password" id="password" name="password" placeholder="Enter your password" required>
+
+    <button type="submit">Login</button>
+    <p class="helper-text">Forgot password? Contact your academic advisor.</p>
+  </form>
+
+  <script>
+    const form = document.getElementById('login-form');
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+
+      const id = document.getElementById('student-id').value.trim();
+      const password = document.getElementById('password').value.trim();
+
+      if (!id || !password) {
+        alert('Please enter both Student ID and Password.');
+        return;
+      }
+
+      window.location.href = 'STUDENTHOME.html';
+    });
+  </script>
+</body>
+</html>
+

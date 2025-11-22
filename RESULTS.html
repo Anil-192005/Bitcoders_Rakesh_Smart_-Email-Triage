@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz Results</title>
+  <style>
+    :root {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      color: #172238;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(140deg, #e6edff, #fbfdff);
+      display: flex;
+      justify-content: center;
+      padding: 2rem 1rem 3rem;
+    }
+    .page {
+      width: min(1200px, 100%);
+      background: #fff;
+      border-radius: 28px;
+      box-shadow: 0 30px 80px rgba(15, 34, 70, 0.15);
+      overflow: hidden;
+    }
+    header {
+      background: linear-gradient(120deg, #6275ff, #74d2ff);
+      color: #fff;
+      padding: 2.5rem 3rem 2rem;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 600;
+      opacity: 0.9;
+      margin-bottom: 1.4rem;
+    }
+    .back-link span {
+      font-size: 1.2rem;
+      line-height: 1;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 2.1rem;
+    }
+    header p {
+      margin: 0.5rem 0 0;
+      opacity: 0.95;
+    }
+    main {
+      padding: 2.4rem 3rem 3rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+    .summary-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+    .summary-card {
+      border: 1px solid #e3e9fb;
+      border-radius: 20px;
+      padding: 1.4rem;
+      background: #f5f8ff;
+    }
+    .summary-card h2 {
+      margin: 0;
+      font-size: 2.4rem;
+      color: #1c2b52;
+    }
+    .summary-card p {
+      margin: 0.4rem 0 0;
+      color: #63729a;
+      font-size: 0.9rem;
+    }
+    .leaderboard {
+      border: 1px solid #e3e9fb;
+      border-radius: 24px;
+      padding: 1.4rem 1.8rem 1.8rem;
+    }
+    .leaderboard h3 {
+      margin: 0 0 1rem;
+      font-size: 1.2rem;
+      color: #1e2f58;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+    }
+    th, td {
+      text-align: left;
+      padding: 0.8rem 0.4rem;
+      border-bottom: 1px solid #eef2ff;
+    }
+    th {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #7d87a5;
+    }
+    td {
+      color: #233357;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.2rem 0.7rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      background: #ecf2ff;
+      color: #1c52ff;
+    }
+    .subject-badge {
+      background: #ecf2ff;
+      color: #1c52ff;
+    }
+    .subject-section {
+      margin-top: 1rem;
+    }
+    .section-title {
+      font-size: 1.1rem;
+      color: #1e2f58;
+      margin: 0 0 1.2rem;
+      font-weight: 600;
+    }
+    .subject-results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+    .subject-result-card {
+      border: 1px solid #e3e9fb;
+      border-radius: 24px;
+      overflow: hidden;
+      background: #fff;
+      box-shadow: 0 10px 30px rgba(15, 34, 70, 0.1);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .subject-result-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 15px 40px rgba(15, 34, 70, 0.15);
+    }
+    .subject-header {
+      padding: 1.5rem;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .subject-icon {
+      font-size: 2rem;
+      background: rgba(255, 255, 255, 0.2);
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(10px);
+    }
+    .subject-header h4 {
+      margin: 0;
+      font-size: 1.4rem;
+      font-weight: 600;
+    }
+    .subject-body {
+      padding: 1.8rem 1.5rem;
+    }
+    .percentage-display {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    .percentage-value {
+      display: block;
+      font-size: 3rem;
+      font-weight: 700;
+      color: #1c2b52;
+      line-height: 1;
+    }
+    .percentage-label {
+      display: block;
+      font-size: 0.85rem;
+      color: #7d87a5;
+      margin-top: 0.4rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.2rem;
+    }
+    .stat-item {
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #1c2b52;
+    }
+    .stat-label {
+      font-size: 0.75rem;
+      color: #7d87a5;
+      margin-top: 0.2rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .progress-bar {
+      width: 100%;
+      height: 12px;
+      background: #eef2ff;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+    .progress-fill {
+      height: 100%;
+      width: var(--progress, 0%);
+      border-radius: 999px;
+      transition: width 0.6s ease;
+    }
+    .subject-status {
+      text-align: center;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #667398;
+      padding: 0.5rem;
+      background: #f5f8ff;
+      border-radius: 12px;
+    }
+    .ai-section {
+      margin-top: 2rem;
+      padding: 2rem;
+      background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+      border-radius: 24px;
+      border: 1px solid #bae6fd;
+    }
+    .recommendations-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+    .recommendation-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 1.5rem;
+      border-left: 4px solid #3b82f6;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+    }
+    .recommendation-card.high-priority {
+      border-left-color: #ef4444;
+      background: #fef2f2;
+    }
+    .recommendation-card.medium-priority {
+      border-left-color: #f59e0b;
+      background: #fffbeb;
+    }
+    .recommendation-card h4 {
+      margin: 0 0 0.5rem;
+      color: #1e293b;
+      font-size: 1.1rem;
+    }
+    .recommendation-card .priority-badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    .priority-badge.high {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    .priority-badge.medium {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    .priority-badge.low {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+    .action-items {
+      list-style: none;
+      padding: 0;
+      margin: 0.8rem 0 0;
+    }
+    .action-items li {
+      padding: 0.4rem 0 0.4rem 1.5rem;
+      position: relative;
+      color: #475569;
+    }
+    .action-items li:before {
+      content: '✓';
+      position: absolute;
+      left: 0;
+      color: #10b981;
+      font-weight: bold;
+    }
+    .insights-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+    .insight-card {
+      background: #fff;
+      padding: 1.5rem;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    .insight-card h4 {
+      margin: 0 0 1rem;
+      font-size: 1.1rem;
+    }
+    .insight-card ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .insight-card li {
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .weakness-item {
+      padding: 1rem;
+      margin-bottom: 0.8rem;
+      background: #fef2f2;
+      border-radius: 12px;
+      border-left: 3px solid #ef4444;
+    }
+    .weakness-item h5 {
+      margin: 0 0 0.3rem;
+      color: #991b1b;
+    }
+    .weakness-item p {
+      margin: 0.3rem 0;
+      font-size: 0.9rem;
+      color: #64748b;
+    }
+    .study-plan-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .study-subject-card {
+      background: #fff;
+      padding: 1.2rem;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+    }
+    .study-subject-card h5 {
+      margin: 0 0 0.5rem;
+      color: #1e293b;
+      text-transform: capitalize;
+    }
+    .time-allocation {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #3b82f6;
+      margin: 0.5rem 0;
+    }
+    .focus-badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: #dbeafe;
+      color: #1e40af;
+    }
+    .notes {
+      border: 1px dashed #bcd4ff;
+      border-radius: 18px;
+      padding: 1.2rem 1.4rem;
+      background: #f9fcff;
+      color: #41527a;
+      font-size: 0.92rem;
+    }
+    .notes strong {
+      color: #1f2f55;
+    }
+    @media (max-width: 720px) {
+      header, main {
+        padding: 2rem 1.5rem;
+      }
+      .subject-results-grid {
+        grid-template-columns: 1fr;
+      }
+      .percentage-value {
+        font-size: 2.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <a class="back-link" href="STUDENTHOME.html">
+        <span>←</span>
+        Back to Dashboard
+      </a>
+      <h1>Quiz Performance Report</h1>
+      <p>See how you performed across Biology, Chemistry, and Physics. Each subject's percentage shows accuracy based on correct answers vs total questions in that subject.</p>
+    </header>
+    <main>
+      <div class="summary-row">
+        <div class="summary-card">
+          <h2 id="overall-accuracy">--%</h2>
+          <p>Overall accuracy across all quizzes</p>
+        </div>
+        <div class="summary-card">
+          <h2 id="questions-attempted">--</h2>
+          <p>Questions attempted</p>
+        </div>
+        <div class="summary-card">
+          <h2 id="last-updated">--</h2>
+          <p>Last saved</p>
+        </div>
+      </div>
+
+      <div class="subject-section">
+        <h3 class="section-title">Individual Subject Performance</h3>
+        <div class="subject-results-grid">
+          <div class="subject-result-card" data-subject="biology">
+            <div class="subject-header" style="background: linear-gradient(135deg, #4ade80, #22c55e);">
+              <div class="subject-icon">🧬</div>
+              <h4>Biology</h4>
+            </div>
+            <div class="subject-body">
+              <div class="percentage-display">
+                <span class="percentage-value">--%</span>
+                <span class="percentage-label">Accuracy</span>
+              </div>
+              <div class="stats-row">
+                <div class="stat-item">
+                  <div class="stat-value" id="bio-correct">--</div>
+                  <div class="stat-label">Correct</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-value" id="bio-total">--</div>
+                  <div class="stat-label">Total</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-value" id="bio-wrong">--</div>
+                  <div class="stat-label">Wrong</div>
+                </div>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="--progress: 0%; background: #22c55e;"></div>
+              </div>
+              <div class="subject-status">Awaiting responses</div>
+            </div>
+          </div>
+
+          <div class="subject-result-card" data-subject="chemistry">
+            <div class="subject-header" style="background: linear-gradient(135deg, #60a5fa, #3b82f6);">
+              <div class="subject-icon">⚗️</div>
+              <h4>Chemistry</h4>
+            </div>
+            <div class="subject-body">
+              <div class="percentage-display">
+                <span class="percentage-value">--%</span>
+                <span class="percentage-label">Accuracy</span>
+              </div>
+              <div class="stats-row">
+                <div class="stat-item">
+                  <div class="stat-value" id="chem-correct">--</div>
+                  <div class="stat-label">Correct</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-value" id="chem-total">--</div>
+                  <div class="stat-label">Total</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-value" id="chem-wrong">--</div>
+                  <div class="stat-label">Wrong</div>
+                </div>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="--progress: 0%; background: #3b82f6;"></div>
+              </div>
+              <div class="subject-status">Awaiting responses</div>
+            </div>
+          </div>
+
+          <div class="subject-result-card" data-subject="physics">
+            <div class="subject-header" style="background: linear-gradient(135deg, #a78bfa, #8b5cf6);">
+              <div class="subject-icon">⚛️</div>
+              <h4>Physics</h4>
+            </div>
+            <div class="subject-body">
+              <div class="percentage-display">
+                <span class="percentage-value">--%</span>
+                <span class="percentage-label">Accuracy</span>
+              </div>
+              <div class="stats-row">
+                <div class="stat-item">
+                  <div class="stat-value" id="phys-correct">--</div>
+                  <div class="stat-label">Correct</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-value" id="phys-total">--</div>
+                  <div class="stat-label">Total</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-value" id="phys-wrong">--</div>
+                  <div class="stat-label">Wrong</div>
+                </div>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="--progress: 0%; background: #8b5cf6;"></div>
+              </div>
+              <div class="subject-status">Awaiting responses</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="leaderboard">
+        <h3>Recent Quiz Breakdown</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Subject</th>
+              <th>Correct</th>
+              <th>Total</th>
+              <th>Accuracy</th>
+            </tr>
+          </thead>
+          <tbody id="results-table-body">
+            <tr>
+              <td colspan="4">No quiz data stored yet.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="notes">
+        <strong>Tip:</strong> <span id="notes-text">Submit answers from the quiz page to unlock your personalized insights here.</span>
+      </div>
+
+      <!-- AI Recommendations Section -->
+      <div id="ai-recommendations" class="ai-section" style="display: none;">
+        <h3 class="section-title">🤖 AI-Powered Recommendations</h3>
+        <div id="recommendations-container"></div>
+      </div>
+
+      <!-- Study Plan Section -->
+      <div id="study-plan-section" class="ai-section" style="display: none;">
+        <h3 class="section-title">📚 Personalized Study Plan</h3>
+        <div id="study-plan-container"></div>
+      </div>
+
+      <!-- Strengths & Weaknesses -->
+      <div id="insights-section" class="ai-section" style="display: none;">
+        <h3 class="section-title">📊 Performance Insights</h3>
+        <div class="insights-grid">
+          <div class="insight-card strength-card">
+            <h4>🌟 Your Strengths</h4>
+            <ul id="strengths-list"></ul>
+          </div>
+          <div class="insight-card weakness-card">
+            <h4>🎯 Areas to Improve</h4>
+            <div id="weaknesses-list"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script>
+    console.log('📊 RESULTS PAGE SCRIPT LOADED');
+    console.log('Current URL:', window.location.href);
+    console.log('Checking localStorage...');
+    console.log('All localStorage keys:', Object.keys(localStorage));
+    console.log('localStorage.length:', localStorage.length);
+    
+    // Try to get the quiz results
+    const stored = localStorage.getItem('quizResults');
+    console.log('Raw stored value:', stored);
+    console.log('Stored quiz results:', stored);
+    
+    const overallEl = document.getElementById('overall-accuracy');
+    const attemptedEl = document.getElementById('questions-attempted');
+    const updatedEl = document.getElementById('last-updated');
+    const notesEl = document.getElementById('notes-text');
+    const tableBody = document.getElementById('results-table-body');
+    // stored is already retrieved above
+    const subjectLabels = {
+      biology: 'Biology',
+      chemistry: 'Chemistry',
+      physics: 'Physics',
+    };
+
+    console.log('Stored quiz results:', stored);
+
+    if (!stored) {
+      console.log('No quiz results found in localStorage');
+      overallEl.textContent = '--%';
+      attemptedEl.textContent = '0 / 0';
+      updatedEl.textContent = 'No submissions yet';
+      tableBody.innerHTML = '<tr><td colspan="4">No quiz data stored yet.</td></tr>';
+    } else {
+      const summary = JSON.parse(stored);
+      console.log('Parsed summary:', summary);
+      
+      const overallPercent = summary.overall.total
+        ? Math.round((summary.overall.correct / summary.overall.total) * 100)
+        : 0;
+      overallEl.textContent = `${overallPercent}%`;
+      attemptedEl.textContent = `${summary.overall.answered} / ${summary.overall.total}`;
+      updatedEl.textContent = new Date(summary.timestamp).toLocaleString();
+
+      const subjectCards = document.querySelectorAll('.subject-result-card');
+      console.log('Subject cards found:', subjectCards.length);
+      
+      subjectCards.forEach(card => {
+        const subjectKey = card.dataset.subject;
+        const stats = summary.subjects[subjectKey];
+        console.log(`Processing ${subjectKey}:`, stats);
+        
+        const percentageValue = card.querySelector('.percentage-value');
+        const progressFill = card.querySelector('.progress-fill');
+        const statusEl = card.querySelector('.subject-status');
+        
+        let correctId, totalId, wrongId;
+        if (subjectKey === 'biology') {
+          correctId = 'bio-correct';
+          totalId = 'bio-total';
+          wrongId = 'bio-wrong';
+        } else if (subjectKey === 'chemistry') {
+          correctId = 'chem-correct';
+          totalId = 'chem-total';
+          wrongId = 'chem-wrong';
+        } else if (subjectKey === 'physics') {
+          correctId = 'phys-correct';
+          totalId = 'phys-total';
+          wrongId = 'phys-wrong';
+        }
+
+        if (stats && stats.total) {
+          const percent = Math.round((stats.correct / stats.total) * 100);
+          const wrong = stats.total - stats.correct;
+          
+          console.log(`${subjectKey} - Percent: ${percent}%, Correct: ${stats.correct}, Total: ${stats.total}, Wrong: ${wrong}`);
+          
+          percentageValue.textContent = `${percent}%`;
+          progressFill.style.setProperty('--progress', `${percent}%`);
+          
+          document.getElementById(correctId).textContent = stats.correct;
+          document.getElementById(totalId).textContent = stats.total;
+          document.getElementById(wrongId).textContent = wrong;
+          
+          if (percent >= 85) {
+            statusEl.textContent = '🌟 Excellent Performance';
+            statusEl.style.background = '#d1fae5';
+            statusEl.style.color = '#065f46';
+          } else if (percent >= 70) {
+            statusEl.textContent = '✅ Good Progress';
+            statusEl.style.background = '#dbeafe';
+            statusEl.style.color = '#1e40af';
+          } else if (percent >= 50) {
+            statusEl.textContent = '📈 Keep Practicing';
+            statusEl.style.background = '#fef3c7';
+            statusEl.style.color = '#92400e';
+          } else {
+            statusEl.textContent = '📚 Needs More Review';
+            statusEl.style.background = '#fee2e2';
+            statusEl.style.color = '#991b1b';
+          }
+        } else {
+          console.log(`${subjectKey} - No data available`);
+          percentageValue.textContent = '--%';
+          progressFill.style.setProperty('--progress', '0%');
+          document.getElementById(correctId).textContent = '--';
+          document.getElementById(totalId).textContent = '--';
+          document.getElementById(wrongId).textContent = '--';
+          statusEl.textContent = 'Awaiting responses';
+          statusEl.style.background = '#f5f8ff';
+          statusEl.style.color = '#667398';
+        }
+      });
+
+      tableBody.innerHTML = '';
+      const subjectsEntries = Object.entries(summary.subjects);
+      if (subjectsEntries.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="4">No quiz data stored yet.</td></tr>';
+      } else {
+        subjectsEntries.forEach(([key, stats]) => {
+          const row = document.createElement('tr');
+          const percent = stats.total ? Math.round((stats.correct / stats.total) * 100) : 0;
+          row.innerHTML = `
+            <td>${subjectLabels[key] || key}</td>
+            <td>${stats.correct}</td>
+            <td>${stats.total}</td>
+            <td>${percent}%</td>
+          `;
+          tableBody.appendChild(row);
+        });
+      }
+
+      if (subjectsEntries.length) {
+        const weakest = subjectsEntries
+          .filter(([, stats]) => stats.total)
+          .sort((a, b) => (a[1].correct / (a[1].total || 1)) - (b[1].correct / (b[1].total || 1)))[0];
+        if (weakest) {
+          const percent = weakest[1].total ? Math.round((weakest[1].correct / weakest[1].total) * 100) : 0;
+          notesEl.textContent = `Focus on ${subjectLabels[weakest[0]] || weakest[0]} to lift its ${percent}% accuracy closer to your best-performing subject.`;
+        } else {
+          notesEl.textContent = 'Great job! Keep taking quizzes to maintain your streak.';
+        }
+      }
+      
+      // Call AI Analysis API
+      fetchAIAnalysis(summary);
+    }
+    
+    // AI Analysis Functions
+    async function fetchAIAnalysis(quizData) {
+      console.log('🤖 Attempting to fetch AI analysis...');
+      console.log('Quiz data being sent:', quizData);
+      
+      try {
+        const response = await fetch('http://localhost:5000/api/analyze', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(quizData)
+        });
+        
+        console.log('API Response status:', response.status);
+        
+        if (!response.ok) {
+          throw new Error(`AI API returned status ${response.status}`);
+        }
+        
+        const result = await response.json();
+        console.log('✅ AI Analysis received successfully!');
+        console.log('Analysis data:', result);
+        
+        if (result.status === 'success') {
+          displayAIInsights(result.data);
+        } else {
+          console.error('AI API returned error:', result);
+          displayBasicRecommendations(quizData);
+        }
+      } catch (error) {
+        console.warn('⚠️ AI API not available:', error.message);
+        console.log('Showing fallback recommendations...');
+        // Fallback: Show basic recommendations without AI
+        displayBasicRecommendations(quizData);
+      }
+    }
+    
+    function displayAIInsights(analysis) {
+      // Display Recommendations
+      if (analysis.recommendations && analysis.recommendations.length > 0) {
+        const recContainer = document.getElementById('recommendations-container');
+        recContainer.innerHTML = '';
+        
+        analysis.recommendations.forEach(rec => {
+          const card = document.createElement('div');
+          card.className = `recommendation-card ${rec.priority.toLowerCase()}-priority`;
+          
+          const actionItems = rec.action_items ? 
+            `<ul class="action-items">${rec.action_items.map(item => `<li>${item}</li>`).join('')}</ul>` : '';
+          
+          card.innerHTML = `
+            <span class="priority-badge ${rec.priority.toLowerCase()}">${rec.priority} Priority</span>
+            <h4>${rec.title}</h4>
+            <p>${rec.description}</p>
+            ${actionItems}
+          `;
+          
+          recContainer.appendChild(card);
+        });
+        
+        document.getElementById('ai-recommendations').style.display = 'block';
+      }
+      
+      // Display Strengths
+      if (analysis.strengths && analysis.strengths.length > 0) {
+        const strengthsList = document.getElementById('strengths-list');
+        strengthsList.innerHTML = '';
+        
+        analysis.strengths.forEach(strength => {
+          const li = document.createElement('li');
+          li.textContent = strength;
+          strengthsList.appendChild(li);
+        });
+      }
+      
+      // Display Weaknesses
+      if (analysis.weaknesses && analysis.weaknesses.length > 0) {
+        const weaknessesList = document.getElementById('weaknesses-list');
+        weaknessesList.innerHTML = '';
+        
+        analysis.weaknesses.forEach(weakness => {
+          const div = document.createElement('div');
+          div.className = 'weakness-item';
+          div.innerHTML = `
+            <h5>${weakness.subject} - ${weakness.accuracy}%</h5>
+            <p><strong>Severity:</strong> ${weakness.severity}</p>
+            <p>${weakness.action}</p>
+          `;
+          weaknessesList.appendChild(div);
+        });
+      }
+      
+      if ((analysis.strengths && analysis.strengths.length > 0) || (analysis.weaknesses && analysis.weaknesses.length > 0)) {
+        document.getElementById('insights-section').style.display = 'block';
+      }
+      
+      // Display Study Plan
+      if (analysis.study_plan && analysis.study_plan.daily_schedule) {
+        const planContainer = document.getElementById('study-plan-container');
+        planContainer.innerHTML = '<div class="study-plan-grid"></div>';
+        const grid = planContainer.querySelector('.study-plan-grid');
+        
+        Object.entries(analysis.study_plan.daily_schedule).forEach(([subject, plan]) => {
+          const card = document.createElement('div');
+          card.className = 'study-subject-card';
+          card.innerHTML = `
+            <h5>${subject}</h5>
+            <div class="time-allocation">${plan.time_minutes} min/day</div>
+            <span class="focus-badge">${plan.focus_level} Focus</span>
+          `;
+          grid.appendChild(card);
+        });
+        
+        if (analysis.study_plan.weekly_goals && analysis.study_plan.weekly_goals.length > 0) {
+          const goalsDiv = document.createElement('div');
+          goalsDiv.style.marginTop = '1.5rem';
+          goalsDiv.innerHTML = '<h4>Weekly Goals</h4><ul class="action-items"></ul>';
+          const goalsList = goalsDiv.querySelector('ul');
+          
+          analysis.study_plan.weekly_goals.forEach(goal => {
+            const li = document.createElement('li');
+            li.textContent = goal;
+            goalsList.appendChild(li);
+          });
+          
+          planContainer.appendChild(goalsDiv);
+        }
+        
+        document.getElementById('study-plan-section').style.display = 'block';
+      }
+    }
+    
+    function displayBasicRecommendations(quizData) {
+      // Fallback recommendations when AI API is not available
+      const subjects = quizData.subjects || {};
+      const recommendations = [];
+      
+      // Find weakest subject
+      let weakestSubject = null;
+      let lowestScore = 100;
+      
+      Object.entries(subjects).forEach(([subject, stats]) => {
+        const accuracy = stats.total ? (stats.correct / stats.total * 100) : 0;
+        if (accuracy < lowestScore) {
+          lowestScore = accuracy;
+          weakestSubject = subject;
+        }
+      });
+      
+      if (weakestSubject && lowestScore < 70) {
+        const recContainer = document.getElementById('recommendations-container');
+        recContainer.innerHTML = `
+          <div class="recommendation-card high-priority">
+            <span class="priority-badge high">High Priority</span>
+            <h4>Focus on ${weakestSubject.charAt(0).toUpperCase() + weakestSubject.slice(1)}</h4>
+            <p>Your ${weakestSubject} score is ${lowestScore.toFixed(0)}%. This needs immediate attention.</p>
+            <ul class="action-items">
+              <li>Review fundamental ${weakestSubject} concepts</li>
+              <li>Practice 10-15 questions daily</li>
+              <li>Watch tutorial videos on weak topics</li>
+            </ul>
+          </div>
+        `;
+        
+        document.getElementById('ai-recommendations').style.display = 'block';
+      }
+    }
+  </script>
+</body>
+</html>
+

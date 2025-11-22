@@ -1,0 +1,247 @@
+:root {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: #0f172a;
+  background: #f8fafc;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 2rem 1rem 3rem;
+}
+
+.app-shell {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+header h1 {
+  margin: 0 0 0.5rem;
+  font-size: 2.2rem;
+}
+
+.card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 12px 35px rgba(15, 23, 42, 0.08);
+  margin-bottom: 1.5rem;
+}
+
+.card-header {
+  margin-bottom: 1rem;
+}
+
+label {
+  display: block;
+  font-weight: 600;
+  margin-top: 1rem;
+  margin-bottom: 0.35rem;
+}
+
+input,
+select,
+button {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 10px;
+  border: 1px solid #cbd5f5;
+  font-size: 1rem;
+}
+
+button {
+  margin-top: 1rem;
+  background: #2563eb;
+  color: #fff;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.2s ease;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+button.secondary {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+button.success {
+  background: #10b981;
+}
+
+.access-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.access-actions button {
+  flex: 1 1 180px;
+}
+
+.success-text {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+th,
+td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+th {
+  background: #f1f5f9;
+  font-weight: 600;
+}
+
+.helper-text {
+  margin-top: 0.2rem;
+  color: #64748b;
+}
+
+.hint {
+  margin-top: 0.8rem;
+  font-size: 0.95rem;
+  color: #475569;
+}
+
+#suggestion-result {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 12px;
+  background: #eef2ff;
+}
+
+#suggestion-reason {
+  margin: 0.5rem 0 0;
+  color: #312e81;
+}
+
+.ack {
+  margin-top: 0.75rem;
+  font-weight: 600;
+  color: #065f46;
+}
+
+.hidden {
+  display: none;
+}
+
+.agent-steps {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.agent-steps li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid #e2e8f0;
+  font-weight: 600;
+  color: #475569;
+}
+
+.agent-steps li:last-child {
+  border-bottom: none;
+}
+
+.agent-steps li::before {
+  content: "•";
+  color: #94a3b8;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.agent-steps li.active {
+  color: #1d4ed8;
+}
+
+.agent-steps li.active::before {
+  color: #1d4ed8;
+}
+
+.agent-steps li.done {
+  color: #16a34a;
+}
+
+.agent-steps li.done::before {
+  content: "✓";
+  color: #16a34a;
+  font-weight: 700;
+}
+
+.agent-steps li.error {
+  color: #b91c1c;
+}
+
+.agent-steps li.error::before {
+  content: "!";
+  color: #b91c1c;
+  font-weight: 700;
+}
+
+.agent-log {
+  margin-top: 1rem;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 1rem;
+}
+
+.agent-log h3 {
+  margin: 0 0 0.75rem;
+}
+
+#agent-log-list {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+#agent-log-list li {
+  background: #f1f5f9;
+  border-radius: 12px;
+  padding: 0.75rem;
+  margin-bottom: 0.6rem;
+  font-size: 0.95rem;
+  color: #0f172a;
+}
+
+#agent-log-list li span {
+  display: block;
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-bottom: 0.3rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 600px) {
+  body {
+    padding: 1.25rem;
+  }
+
+  header h1 {
+    font-size: 1.7rem;
+  }
+}
+

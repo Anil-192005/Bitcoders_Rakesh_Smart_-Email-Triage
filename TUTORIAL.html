@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tutorial Resources</title>
+  <style>
+    :root {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      color: #14213d;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #f7f9fc;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 2.5rem 1.5rem;
+    }
+    .wrapper {
+      width: min(900px, 100%);
+      background: #fff;
+      border-radius: 22px;
+      padding: 2.2rem 2.5rem 3rem;
+      box-shadow: 0 30px 60px rgba(20, 33, 61, 0.12);
+    }
+    h1 {
+      margin: 0;
+      font-size: 2rem;
+      color: #0f2147;
+    }
+    p {
+      color: #53627a;
+      margin-top: 0.6rem;
+    }
+    .link-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    .resource-card {
+      border: 1px solid #e1e7f0;
+      border-radius: 16px;
+      padding: 1.2rem 1.4rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      transition: transform 0.15s ease, box-shadow 0.2s ease;
+    }
+    .resource-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 30px rgba(15, 33, 71, 0.12);
+    }
+    .resource-card a {
+      text-decoration: none;
+      color: #0f2147;
+      font-weight: 600;
+      font-size: 1rem;
+      flex: 1;
+      word-break: break-word;
+    }
+    .resource-card span {
+      color: #657694;
+      font-size: 0.9rem;
+    }
+    .back-link {
+      display: inline-flex;
+      margin-top: 2rem;
+      text-decoration: none;
+      color: #1d4dff;
+      font-weight: 600;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    @media (max-width: 640px) {
+      body {
+        padding: 1.5rem;
+      }
+      .wrapper {
+        padding: 1.5rem;
+      }
+      .resource-card {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <h1>Video Tutorials</h1>
+    <p>Jump straight into our curated YouTube sessions shared by Deekshitha.</p>
+
+    <div class="link-list">
+      <div class="resource-card">
+        <div>
+          <h3 style="margin:0; color:#0f2147;">Physics</h3>
+          <span>[21-11-2025 16:09]</span>
+        </div>
+        <a href="https://youtu.be/KChQCUuJJck?si=YaZYpht6NX4NWD2z" target="_blank" rel="noopener">https://youtu.be/KChQCUuJJck?si=YaZYpht6NX4NWD2z</a>
+      </div>
+      <div class="resource-card">
+        <div>
+          <h3 style="margin:0; color:#0f2147;">Chemistry</h3>
+          <span>[21-11-2025 16:12]</span>
+        </div>
+        <a href="https://youtu.be/llS-IoS-s7E?si=5Sw2-i7P6BX34qZR" target="_blank" rel="noopener">https://youtu.be/llS-IoS-s7E?si=5Sw2-i7P6BX34qZR</a>
+      </div>
+      <div class="resource-card">
+        <div>
+          <h3 style="margin:0; color:#0f2147;">Biology</h3>
+          <span>[21-11-2025 16:14]</span>
+        </div>
+        <a href="https://youtu.be/q_RnPjnHv7k?si=rNfdrbYN39XCH3ZJ" target="_blank" rel="noopener">https://youtu.be/q_RnPjnHv7k?si=rNfdrbYN39XCH3ZJ</a>
+      </div>
+    </div>
+
+    <a class="back-link" href="STUDENTHOME.html">‹ Back to Menu</a>
+  </div>
+</body>
+</html>
+

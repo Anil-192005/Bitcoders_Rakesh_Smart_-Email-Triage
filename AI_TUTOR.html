@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Knowledge Gap Tutor</title>
+  <style>
+    :root {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      padding: 2rem 1rem;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .header {
+      background: var(--bg-gradient);
+      color: white;
+      padding: 2.5rem 3rem;
+      border-radius: 24px;
+      margin-bottom: 2rem;
+      box-shadow: 0 20px 60px rgba(102, 102, 246, 0.3);
+    }
+    .header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .header .subtitle {
+      opacity: 0.95;
+      font-size: 1.1rem;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      opacity: 0.9;
+      transition: opacity 0.2s;
+    }
+    .back-link:hover {
+      opacity: 1;
+    }
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+    .card {
+      background: white;
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+    }
+    .card h2 {
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .status-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .status-indicator.active {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    .status-indicator.inactive {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: currentColor;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    .btn {
+      padding: 0.875rem 2rem;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+    }
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 15px 35px rgba(99, 102, 241, 0.4);
+    }
+    .btn-success {
+      background: var(--success);
+      color: white;
+    }
+    .btn-success:hover {
+      background: #059669;
+    }
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+    .analysis-section {
+      margin-top: 1.5rem;
+      padding: 1.5rem;
+      background: #f8fafc;
+      border-radius: 16px;
+      border: 2px dashed #cbd5e1;
+    }
+    .analysis-section.has-data {
+      background: #f0f9ff;
+      border-color: #3b82f6;
+    }
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .metric-card {
+      padding: 1.25rem;
+      background: white;
+      border-radius: 12px;
+      border-left: 4px solid var(--primary);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    .metric-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 0.25rem;
+    }
+    .metric-label {
+      font-size: 0.875rem;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .recommendation-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .recommendation-item {
+      padding: 1.5rem;
+      background: white;
+      border-radius: 16px;
+      border-left: 4px solid #ef4444;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    .recommendation-item.high {
+      border-left-color: #ef4444;
+      background: #fef2f2;
+    }
+    .recommendation-item.medium {
+      border-left-color: #f59e0b;
+      background: #fffbeb;
+    }
+    .recommendation-item.low {
+      border-left-color: #3b82f6;
+      background: #eff6ff;
+    }
+    .recommendation-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+    .recommendation-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: #1e293b;
+    }
+    .priority-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .priority-badge.high {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    .priority-badge.medium {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    .priority-badge.low {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+    .action-list {
+      list-style: none;
+      margin-top: 1rem;
+      padding-left: 0;
+    }
+    .action-list li {
+      padding: 0.5rem 0 0.5rem 1.75rem;
+      position: relative;
+      color: #475569;
+    }
+    .action-list li:before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: var(--primary);
+      font-weight: bold;
+    }
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem;
+      color: #64748b;
+    }
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #e2e8f0;
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-right: 1rem;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .empty-state {
+      text-align: center;
+      padding: 3rem 2rem;
+      color: #64748b;
+    }
+    .empty-state-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.3;
+    }
+    .study-plan-card {
+      padding: 1.25rem;
+      background: white;
+      border-radius: 12px;
+      margin-bottom: 1rem;
+    }
+    .study-plan-card h4 {
+      margin-bottom: 0.75rem;
+      color: #1e293b;
+      text-transform: capitalize;
+    }
+    .time-badge {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      background: var(--bg-gradient);
+      color: white;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1.25rem;
+      margin-bottom: 0.5rem;
+    }
+    .focus-level {
+      font-size: 0.875rem;
+      color: #64748b;
+    }
+    .weakness-card {
+      padding: 1.25rem;
+      background: #fef2f2;
+      border-radius: 12px;
+      border-left: 3px solid #ef4444;
+      margin-bottom: 1rem;
+    }
+    .weakness-card h5 {
+      color: #991b1b;
+      margin-bottom: 0.5rem;
+    }
+    .weakness-stats {
+      display: flex;
+      gap: 2rem;
+      margin: 0.75rem 0;
+      font-size: 0.9rem;
+      color: #64748b;
+    }
+    @media (max-width: 968px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+      .header h1 {
+        font-size: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <a class="back-link" href="STUDENTHOME.html">
+        <span>←</span>
+        Back to Dashboard
+      </a>
+      <h1>
+        <span>🤖</span>
+        AI Knowledge Gap Tutor
+      </h1>
+      <p class="subtitle">Intelligent analysis of your quiz performance with personalized learning recommendations</p>
+    </header>
+
+    <div class="main-grid">
+      <!-- Analysis Status Card -->
+      <div class="card">
+        <h2>📊 Analysis Status</h2>
+        <div id="api-status" class="status-indicator inactive">
+          <span class="status-dot"></span>
+          <span>Checking AI Service...</span>
+        </div>
+        <p style="color: #64748b; margin-bottom: 1.5rem;">
+          The AI tutor analyzes your quiz results to identify knowledge gaps and provide targeted recommendations.
+        </p>
+        <button id="analyze-btn" class="btn btn-primary" disabled>
+          <span>🔍</span>
+          Analyze My Performance
+        </button>
+        <div id="last-analysis" style="margin-top: 1rem; font-size: 0.875rem; color: #64748b;"></div>
+      </div>
+
+      <!-- Quick Stats Card -->
+      <div class="card">
+        <h2>📈 Your Performance Summary</h2>
+        <div id="quick-stats" class="analysis-section">
+          <div class="empty-state">
+            <div class="empty-state-icon">📝</div>
+            <p>Take a quiz and submit your answers to see your performance summary here.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Recommendations Section -->
+    <div class="card" id="recommendations-card" style="display: none;">
+      <h2>🤖 AI KNOWLEDGE GAP TUTOR</h2>
+      <div id="recommendations-content" class="recommendation-list"></div>
+    </div>
+
+    <!-- Study Plan Section -->
+    <div class="card" id="study-plan-card" style="display: none;">
+      <h2>📚 Your Personalized Study Plan</h2>
+      <div id="study-plan-content"></div>
+    </div>
+
+    <!-- Knowledge Gaps Section -->
+    <div class="card" id="gaps-card" style="display: none;">
+      <h2>🎯 Identified Knowledge Gaps</h2>
+      <div id="gaps-content"></div>
+    </div>
+  </div>
+
+  <script>
+    console.log('🤖 AI Knowledge Gap Tutor - Initialized');
+
+    const apiStatus = document.getElementById('api-status');
+    const analyzeBtn = document.getElementById('analyze-btn');
+    const quickStats = document.getElementById('quick-stats');
+    const lastAnalysis = document.getElementById('last-analysis');
+
+    // Check API health
+    async function checkAPIStatus() {
+      try {
+        const response = await fetch('http://localhost:5000/api/health');
+        if (response.ok) {
+          apiStatus.className = 'status-indicator active';
+          apiStatus.innerHTML = '<span class="status-dot"></span><span>AI Service Online</span>';
+          analyzeBtn.disabled = false;
+          return true;
+        }
+      } catch (error) {
+        console.warn('AI API not available:', error);
+      }
+      
+      apiStatus.className = 'status-indicator inactive';
+      apiStatus.innerHTML = '<span class="status-dot"></span><span>AI Service Offline</span>';
+      analyzeBtn.disabled = true;
+      return false;
+    }
+
+    // Load quiz data from localStorage
+    function loadQuizData() {
+      const stored = localStorage.getItem('quizResults');
+      if (!stored) {
+        return null;
+      }
+      return JSON.parse(stored);
+    }
+
+    // Display quick stats
+    function displayQuickStats(data) {
+      if (!data) {
+        quickStats.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">📝</div>
+            <p>No quiz results found. Please take a quiz first.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const overall = data.overall || {};
+      const accuracy = overall.total ? Math.round((overall.correct / overall.total) * 100) : 0;
+
+      quickStats.className = 'analysis-section has-data';
+      quickStats.innerHTML = `
+        <div class="metric-grid">
+          <div class="metric-card">
+            <div class="metric-value">${accuracy}%</div>
+            <div class="metric-label">Overall Accuracy</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value">${overall.correct || 0}</div>
+            <div class="metric-label">Correct Answers</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value">${overall.answered || 0}/${overall.total || 0}</div>
+            <div class="metric-label">Attempted</div>
+          </div>
+        </div>
+      `;
+
+      if (data.timestamp) {
+        lastAnalysis.textContent = `Last quiz: ${new Date(data.timestamp).toLocaleString()}`;
+      }
+    }
+
+    // Analyze performance with AI
+    async function analyzePerformance() {
+      const quizData = loadQuizData();
+      if (!quizData) {
+        alert('No quiz data found. Please take a quiz first!');
+        return;
+      }
+
+      analyzeBtn.disabled = true;
+      analyzeBtn.innerHTML = '<div class="loading-spinner" style="width: 20px; height: 20px; margin: 0;"></div> Analyzing...';
+
+      try {
+        const response = await fetch('http://localhost:5000/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(quizData)
+        });
+
+        if (!response.ok) {
+          throw new Error('Analysis failed');
+        }
+
+        const result = await response.json();
+        console.log('✅ AI Analysis complete:', result);
+
+        if (result.status === 'success') {
+          displayAnalysisResults(result.data);
+        }
+      } catch (error) {
+        console.error('Analysis error:', error);
+        alert('Failed to analyze performance. Please ensure the AI service is running.');
+      } finally {
+        analyzeBtn.disabled = false;
+        analyzeBtn.innerHTML = '<span>🔍</span> Analyze My Performance';
+      }
+    }
+
+    // Display AI analysis results
+    function displayAnalysisResults(analysis) {
+      console.log('Displaying analysis results:', analysis);
+
+      // Display Recommendations
+      if (analysis.recommendations && analysis.recommendations.length > 0) {
+        const recsCard = document.getElementById('recommendations-card');
+        const recsContent = document.getElementById('recommendations-content');
+        
+        recsContent.innerHTML = '';
+        analysis.recommendations.forEach(rec => {
+          const priority = rec.priority.toLowerCase();
+          const actionItems = rec.action_items ? 
+            `<ul class="action-list">${rec.action_items.map(item => `<li>${item}</li>`).join('')}</ul>` : '';
+          
+          const div = document.createElement('div');
+          div.className = `recommendation-item ${priority}`;
+          div.innerHTML = `
+            <div class="recommendation-header">
+              <div class="recommendation-title">${rec.title}</div>
+              <span class="priority-badge ${priority}">${rec.priority}</span>
+            </div>
+            <p style="color: #64748b; margin-bottom: 0.5rem;">${rec.description}</p>
+            ${actionItems}
+          `;
+          recsContent.appendChild(div);
+        });
+        
+        recsCard.style.display = 'block';
+      }
+
+      // Display Study Plan
+      if (analysis.study_plan && analysis.study_plan.daily_schedule) {
+        const planCard = document.getElementById('study-plan-card');
+        const planContent = document.getElementById('study-plan-content');
+        
+        planContent.innerHTML = '';
+        Object.entries(analysis.study_plan.daily_schedule).forEach(([subject, plan]) => {
+          const div = document.createElement('div');
+          div.className = 'study-plan-card';
+          div.innerHTML = `
+            <h4>${subject}</h4>
+            <div class="time-badge">${plan.time_minutes} minutes/day</div>
+            <div class="focus-level">Focus Level: ${plan.focus_level}</div>
+          `;
+          planContent.appendChild(div);
+        });
+
+        if (analysis.study_plan.weekly_goals) {
+          const goalsDiv = document.createElement('div');
+          goalsDiv.style.marginTop = '1.5rem';
+          goalsDiv.innerHTML = `
+            <h3 style="margin-bottom: 1rem;">Weekly Goals</h3>
+            <ul class="action-list">${analysis.study_plan.weekly_goals.map(goal => `<li>${goal}</li>`).join('')}</ul>
+          `;
+          planContent.appendChild(goalsDiv);
+        }
+        
+        planCard.style.display = 'block';
+      }
+
+      // Display Knowledge Gaps (Weaknesses)
+      if (analysis.weaknesses && analysis.weaknesses.length > 0) {
+        const gapsCard = document.getElementById('gaps-card');
+        const gapsContent = document.getElementById('gaps-content');
+        
+        gapsContent.innerHTML = '';
+        analysis.weaknesses.forEach(weakness => {
+          const div = document.createElement('div');
+          div.className = 'weakness-card';
+          div.innerHTML = `
+            <h5>${weakness.subject}</h5>
+            <div class="weakness-stats">
+              <span><strong>Accuracy:</strong> ${weakness.accuracy}%</span>
+              <span><strong>Wrong:</strong> ${weakness.questions_wrong} questions</span>
+              <span><strong>Severity:</strong> ${weakness.severity}</span>
+            </div>
+            <p style="color: #64748b; margin-top: 0.5rem;">${weakness.action}</p>
+          `;
+          gapsContent.appendChild(div);
+        });
+        
+        gapsCard.style.display = 'block';
+      }
+
+      // Scroll to recommendations
+      document.getElementById('recommendations-card').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // Initialize
+    window.addEventListener('DOMContentLoaded', async () => {
+      await checkAPIStatus();
+      const quizData = loadQuizData();
+      displayQuickStats(quizData);
+      
+      if (quizData) {
+        analyzeBtn.disabled = false;
+      }
+    });
+
+    // Event Listeners
+    analyzeBtn.addEventListener('click', analyzePerformance);
+
+    // Auto-refresh API status every 10 seconds
+    setInterval(checkAPIStatus, 10000);
+  </script>
+</body>
+</html>

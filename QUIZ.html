@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STEM Quiz Deck</title>
+  <style>
+    :root {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      color: #172238;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #dfe9ff, #f7fbff);
+      display: flex;
+      justify-content: center;
+      padding: 2rem 1rem 3rem;
+    }
+    .page {
+      width: min(1100px, 100%);
+      background: #fff;
+      border-radius: 2rem;
+      box-shadow: 0 25px 70px rgba(15, 37, 70, 0.15);
+      overflow: hidden;
+    }
+    header {
+      background: linear-gradient(120deg, #6ba9ff, #5edfff);
+      color: #fff;
+      padding: 2.4rem 3rem 2rem;
+    }
+    header p {
+      margin: 0.3rem 0 0;
+      opacity: 0.9;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: #fff;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin-bottom: 1.5rem;
+      opacity: 0.9;
+    }
+    .back-link span {
+      font-size: 1.2rem;
+      line-height: 1;
+    }
+    main {
+      padding: 2.4rem 3rem 3rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    .filters {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      align-items: center;
+    }
+    .filter-row label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #5c6d92;
+      margin-right: 0.4rem;
+    }
+    .pill-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .pill {
+      border: 1px solid #d5def4;
+      border-radius: 999px;
+      padding: 0.35rem 0.95rem;
+      background: #f6faff;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #2a3c63;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .pill.active {
+      background: #1f66ff;
+      color: #fff;
+      border-color: #1f66ff;
+      box-shadow: 0 8px 20px rgba(31, 102, 255, 0.35);
+    }
+    .search-box {
+      flex: 1;
+      min-width: 220px;
+      display: flex;
+      align-items: center;
+      border: 1px solid #d5def4;
+      border-radius: 999px;
+      padding: 0.35rem 0.9rem;
+      background: #f8faff;
+    }
+    .search-box input {
+      width: 100%;
+      border: none;
+      background: transparent;
+      font-size: 0.95rem;
+      padding: 0.4rem;
+      color: #1d2a44;
+    }
+    .search-box input:focus {
+      outline: none;
+    }
+    .quiz-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.1rem;
+    }
+    .quiz-card {
+      border: 1px solid #e0e8fa;
+      border-radius: 1rem;
+      background: #fff;
+      box-shadow: 0 18px 30px rgba(19, 47, 100, 0.08);
+      padding: 1.3rem 1.4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      transition: border-color 0.2s ease, transform 0.2s ease;
+    }
+    .quiz-card:hover {
+      border-color: #6ea1ff;
+      transform: translateY(-2px);
+    }
+    .question-number {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #7b8bb0;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+    .question-text {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #12284a;
+    }
+    .topic {
+      margin: 0;
+      font-size: 0.8rem;
+      color: #6e7fa7;
+    }
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      margin-top: 0.3rem;
+    }
+    .option-row {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      padding: 0.35rem 0.5rem;
+      border-radius: 0.7rem;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: border-color 0.15s ease, background 0.15s ease;
+      font-size: 0.92rem;
+      color: #24385f;
+    }
+    .option-row input {
+      accent-color: #1f66ff;
+    }
+    .option-row:hover {
+      border-color: #d7e3ff;
+      background: #f7faff;
+    }
+    .quiz-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      align-items: center;
+      margin: 0.5rem 0 1.2rem;
+    }
+    .submit-btn {
+      border: none;
+      background: #1f66ff;
+      color: #fff;
+      padding: 0.75rem 1.8rem;
+      border-radius: 999px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 12px 25px rgba(31, 102, 255, 0.3);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .submit-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 16px 30px rgba(31, 102, 255, 0.35);
+    }
+    .status-banner {
+      flex: 1;
+      min-width: 240px;
+      border: 1px dashed #cbd4f5;
+      border-radius: 999px;
+      padding: 0.65rem 1rem;
+      font-size: 0.9rem;
+      color: #41527a;
+      background: #f6f8ff;
+    }
+    .status-banner.success {
+      border-color: #9dd9b4;
+      background: #f2fff6;
+      color: #1b4f2d;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: #627191;
+    }
+    @media (max-width: 640px) {
+      header, main {
+        padding: 1.8rem 1.4rem;
+      }
+      .filters {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .search-box {
+        border-radius: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <a class="back-link" href="STUDENTHOME.html">
+        <span>←</span>
+        Back to Dashboard
+      </a>
+      <h1>STEM Quiz Deck</h1>
+      <p>2nd PUC MCQ practice pulled from the Biology, Chemistry, and Physics question banks. Filter by subject, chapter, or search keywords to focus your revision.</p>
+    </header>
+    <main>
+      <div class="filters">
+        <div class="filter-row">
+          <label>Subject:</label>
+          <div class="pill-group">
+            <button class="pill subject-pill active" data-subject="all">All Subjects</button>
+            <button class="pill subject-pill" data-subject="biology">Biology</button>
+            <button class="pill subject-pill" data-subject="chemistry">Chemistry</button>
+            <button class="pill subject-pill" data-subject="physics">Physics</button>
+          </div>
+        </div>
+        <div class="filter-row">
+          <label>Topics:</label>
+          <div class="pill-group">
+            <button class="pill topic-pill active" data-filter="all">All Topics</button>
+            <button class="pill topic-pill" data-filter="reproduction">Reproduction</button>
+            <button class="pill topic-pill" data-filter="flowering">Flowering Plants</button>
+            <button class="pill topic-pill" data-filter="inheritance">Inheritance</button>
+            <button class="pill topic-pill" data-filter="molecular">Molecular Basis</button>
+            <button class="pill topic-pill" data-filter="evolution">Evolution</button>
+            <button class="pill topic-pill" data-filter="physiology">Human Physiology</button>
+            <button class="pill topic-pill" data-filter="biotech">Biotech</button>
+            <button class="pill topic-pill" data-filter="ecology">Ecology</button>
+            <button class="pill topic-pill" data-filter="solidstate">Solid State</button>
+            <button class="pill topic-pill" data-filter="solutions">Solutions</button>
+            <button class="pill topic-pill" data-filter="electrochem">Electrochemistry</button>
+            <button class="pill topic-pill" data-filter="kinetics">Chemical Kinetics</button>
+            <button class="pill topic-pill" data-filter="coordination">Coordination Compounds</button>
+            <button class="pill topic-pill" data-filter="alcohols">Alcohols & Phenols</button>
+            <button class="pill topic-pill" data-filter="carbonyls">Aldehydes & Ketones</button>
+            <button class="pill topic-pill" data-filter="carboxylic">Carboxylic Acids</button>
+            <button class="pill topic-pill" data-filter="amines">Amines</button>
+            <button class="pill topic-pill" data-filter="biomolecules">Biomolecules</button>
+            <button class="pill topic-pill" data-filter="polymers">Polymers</button>
+            <button class="pill topic-pill" data-filter="electric-fields">Electric Charges & Fields</button>
+            <button class="pill topic-pill" data-filter="electrostatics">Electrostatic Potential</button>
+            <button class="pill topic-pill" data-filter="current-electricity">Current Electricity</button>
+            <button class="pill topic-pill" data-filter="moving-charges">Moving Charges & Magnetism</button>
+            <button class="pill topic-pill" data-filter="magnetism-matter">Magnetism & Matter</button>
+            <button class="pill topic-pill" data-filter="emi">Electromagnetic Induction</button>
+            <button class="pill topic-pill" data-filter="ac">Alternating Current</button>
+            <button class="pill topic-pill" data-filter="em-waves">Electromagnetic Waves</button>
+            <button class="pill topic-pill" data-filter="ray-optics">Ray Optics</button>
+            <button class="pill topic-pill" data-filter="wave-optics">Wave Optics</button>
+            <button class="pill topic-pill" data-filter="dual-nature">Dual Nature</button>
+            <button class="pill topic-pill" data-filter="atoms-nuclei">Atoms & Nuclei</button>
+            <button class="pill topic-pill" data-filter="semiconductors">Semiconductor Electronics</button>
+          </div>
+          <div class="search-box">
+            <input type="search" id="quiz-search" placeholder="Search question or option...">
+          </div>
+        </div>
+      </div>
+
+      <div class="quiz-actions">
+        <button id="submit-quiz" class="submit-btn">Submit Answers</button>
+        <div id="quiz-status" class="status-banner">Select answers and submit to calculate your score.</div>
+      </div>
+
+      <div id="quiz-grid" class="quiz-grid">
+        <!-- Cards injected via JS -->
+      </div>
+      <div id="empty-state" class="empty-state" hidden>
+        No questions match your current filter. Try a different topic or clear the search.
+      </div>
+    </main>
+  </div>
+
+  <script>
+    console.log('🚀 QUIZ PAGE SCRIPT LOADED');
+    console.log('Current URL:', window.location.href);
+    
+    const questions = [
+      {
+        id: 1,
+        subject: 'biology',
+        unit: 'reproduction',
+        unitLabel: 'Reproduction in Organisms',
+        question: 'The period from birth to the natural death of an organism is called?',
+        options: ['a) Lifespan', 'b) Longevity', 'c) Life cycle', 'd) Senescence'],
+        answer: 'a) Lifespan'
+      },
+      {
+        id: 2,
+        subject: 'biology',
+        unit: 'reproduction',
+        unitLabel: 'Reproduction in Organisms',
+        question: 'Sexual reproduction involves which key process?',
+        options: ['a) Binary fission', 'b) Fusion of gametes', 'c) Budding', 'd) Fragmentation'],
+        answer: 'b) Fusion of gametes'
+      },
+      {
+        id: 3,
+        subject: 'biology',
+        unit: 'flowering',
+        unitLabel: 'Sexual Reproduction in Flowering Plants',
+        question: 'Double fertilization is characteristic of which group?',
+        options: ['a) Bryophytes', 'b) Gymnosperms', 'c) Angiosperms', 'd) Algae'],
+        answer: 'c) Angiosperms'
+      },
+      {
+        id: 4,
+        subject: 'biology',
+        unit: 'flowering',
+        unitLabel: 'Sexual Reproduction in Flowering Plants',
+        question: 'The outermost whorl of a flower is known as?',
+        options: ['a) Corolla', 'b) Calyx', 'c) Androecium', 'd) Gynoecium'],
+        answer: 'b) Calyx'
+      },
+      {
+        id: 5,
+        subject: 'biology',
+        unit: 'inheritance',
+        unitLabel: 'Principles of Inheritance & Variation',
+        question: 'Law of independent assortment was proposed by?',
+        options: ['a) Darwin', 'b) Mendel', 'c) Lamarck', 'd) Morgan'],
+        answer: 'b) Mendel'
+      },
+      {
+        id: 6,
+        subject: 'biology',
+        unit: 'inheritance',
+        unitLabel: 'Principles of Inheritance & Variation',
+        question: 'A cross between an F1 individual and the recessive parent is?',
+        options: ['a) Back cross', 'b) Test cross', 'c) Reciprocal cross', 'd) Monohybrid cross'],
+        answer: 'b) Test cross'
+      },
+      {
+        id: 7,
+        subject: 'biology',
+        unit: 'molecular',
+        unitLabel: 'Molecular Basis of Inheritance',
+        question: 'What is the repeating unit of DNA?',
+        options: ['a) Ribose', 'b) Nucleotide', 'c) Histone', 'd) Codon'],
+        answer: 'b) Nucleotide'
+      },
+      {
+        id: 8,
+        subject: 'biology',
+        unit: 'molecular',
+        unitLabel: 'Molecular Basis of Inheritance',
+        question: 'Which bond connects two nucleotides in DNA?',
+        options: ['a) Glycosidic bond', 'b) Peptide bond', 'c) Phosphodiester bond', 'd) Hydrogen bond'],
+        answer: 'c) Phosphodiester bond'
+      },
+      {
+        id: 9,
+        subject: 'biology',
+        unit: 'evolution',
+        unitLabel: 'Evolution',
+        question: 'Who proposed the theory of natural selection?',
+        options: ['a) Lamarck', 'b) Darwin', 'c) Weismann', 'd) Hugo de Vries'],
+        answer: 'b) Darwin'
+      },
+      {
+        id: 10,
+        subject: 'biology',
+        unit: 'evolution',
+        unitLabel: 'Evolution',
+        question: 'Industrial melanism illustrates which evolutionary force?',
+        options: ['a) Mutation', 'b) Natural selection', 'c) Gene flow', 'd) Genetic drift'],
+        answer: 'b) Natural selection'
+      },
+      {
+        id: 11,
+        subject: 'biology',
+        unit: 'physiology',
+        unitLabel: 'Human Physiology',
+        question: 'The functional unit of the kidney is called?',
+        options: ['a) Alveoli', 'b) Nephron', 'c) Neuron', 'd) Villus'],
+        answer: 'b) Nephron'
+      },
+      {
+        id: 12,
+        subject: 'biology',
+        unit: 'physiology',
+        unitLabel: 'Human Physiology',
+        question: 'Gas exchange in human lungs occurs in?',
+        options: ['a) Bronchi', 'b) Bronchioles', 'c) Alveoli', 'd) Trachea'],
+        answer: 'c) Alveoli'
+      },
+      {
+        id: 13,
+        subject: 'biology',
+        unit: 'biotech',
+        unitLabel: 'Biotechnology & Applications',
+        question: 'Restriction enzymes are popularly called?',
+        options: ['a) Ligases', 'b) Scissors of DNA', 'c) Polymerases', 'd) Helicases'],
+        answer: 'b) Scissors of DNA'
+      },
+      {
+        id: 14,
+        subject: 'biology',
+        unit: 'biotech',
+        unitLabel: 'Biotechnology & Applications',
+        question: 'The first recombinant DNA was constructed by?',
+        options: ['a) Cohen & Boyer', 'b) Watson & Crick', 'c) Mendel', 'd) Jenner'],
+        answer: 'a) Cohen & Boyer'
+      },
+      {
+        id: 15,
+        subject: 'biology',
+        unit: 'ecology',
+        unitLabel: 'Ecology',
+        question: 'The place where an organism lives is termed?',
+        options: ['a) Niche', 'b) Habitat', 'c) Community', 'd) Ecosystem'],
+        answer: 'b) Habitat'
+      },
+      {
+        id: 16,
+        subject: 'biology',
+        unit: 'ecology',
+        unitLabel: 'Ecology',
+        question: 'A group of individuals of the same species in an area is?',
+        options: ['a) Community', 'b) Population', 'c) Biome', 'd) Biosphere'],
+        answer: 'b) Population'
+      },
+      {
+        id: 17,
+        subject: 'chemistry',
+        unit: 'solidstate',
+        unitLabel: 'Solid State',
+        question: 'The coordination number of Na⁺ in NaCl is:',
+        options: ['a) 4', 'b) 6', 'c) 8', 'd) 12'],
+        answer: 'b) 6'
+      },
+      {
+        id: 18,
+        subject: 'chemistry',
+        unit: 'solidstate',
+        unitLabel: 'Solid State',
+        question: 'The number of atoms per FCC unit cell is:',
+        options: ['a) 2', 'b) 4', 'c) 6', 'd) 8'],
+        answer: 'b) 4'
+      },
+      {
+        id: 19,
+        subject: 'chemistry',
+        unit: 'solidstate',
+        unitLabel: 'Solid State',
+        question: 'A defect in which equal number of cations and anions are missing is:',
+        options: ['a) Frenkel', 'b) Schottky', 'c) Vacancy', 'd) Interstitial'],
+        answer: 'b) Schottky'
+      },
+      {
+        id: 20,
+        subject: 'chemistry',
+        unit: 'solutions',
+        unitLabel: 'Solutions',
+        question: 'The unit of molality is:',
+        options: ['a) mol L⁻¹', 'b) mol kg⁻¹', 'c) g L⁻¹', 'd) g mol⁻¹'],
+        answer: 'b) mol kg⁻¹'
+      },
+      {
+        id: 21,
+        subject: 'chemistry',
+        unit: 'solutions',
+        unitLabel: 'Solutions',
+        question: 'Which mixture shows positive deviation from Raoult’s law?',
+        options: ['a) CCl₄ + CHCl₃', 'b) Acetone + CS₂', 'c) HCl + water', 'd) Ethanol + water'],
+        answer: 'b) Acetone + CS₂'
+      },
+      {
+        id: 22,
+        subject: 'chemistry',
+        unit: 'solutions',
+        unitLabel: 'Solutions',
+        question: 'Henry’s law constant increases when:',
+        options: ['a) Solubility increases', 'b) Solubility decreases', 'c) Temperature decreases', 'd) Pressure decreases'],
+        answer: 'b) Solubility decreases'
+      },
+      {
+        id: 23,
+        subject: 'chemistry',
+        unit: 'electrochem',
+        unitLabel: 'Electrochemistry',
+        question: 'Standard cell potential is measured under:',
+        options: ['a) 298 K, 1M, 1 atm', 'b) 273 K, 1M, 1 atm', 'c) 298 K, 0.1M', 'd) Any condition'],
+        answer: 'a) 298 K, 1M, 1 atm'
+      },
+      {
+        id: 24,
+        subject: 'chemistry',
+        unit: 'electrochem',
+        unitLabel: 'Electrochemistry',
+        question: 'Conductivity decreases with:',
+        options: ['a) Dilution', 'b) Concentration', 'c) Temperature', 'd) Pressure'],
+        answer: 'a) Dilution'
+      },
+      {
+        id: 25,
+        subject: 'chemistry',
+        unit: 'electrochem',
+        unitLabel: 'Electrochemistry',
+        question: 'The SI unit of molar conductivity is:',
+        options: ['a) S cm² mol⁻¹', 'b) ohm⁻¹ m² mol⁻¹', 'c) S m⁻¹', 'd) mho cm⁻¹'],
+        answer: 'b) ohm⁻¹ m² mol⁻¹'
+      },
+      {
+        id: 26,
+        subject: 'chemistry',
+        unit: 'kinetics',
+        unitLabel: 'Chemical Kinetics',
+        question: 'The rate of a reaction depends on:',
+        options: ['a) Temperature', 'b) Pressure', 'c) Catalyst', 'd) All of these'],
+        answer: 'd) All of these'
+      },
+      {
+        id: 27,
+        subject: 'chemistry',
+        unit: 'kinetics',
+        unitLabel: 'Chemical Kinetics',
+        question: 'For a first-order reaction, half-life is:',
+        options: ['a) Inversely proportional to concentration', 'b) Directly proportional to concentration', 'c) Independent of concentration', 'd) Proportional to concentration squared'],
+        answer: 'c) Independent of concentration'
+      },
+      {
+        id: 28,
+        subject: 'chemistry',
+        unit: 'kinetics',
+        unitLabel: 'Chemical Kinetics',
+        question: 'A plot of log [A] vs time is linear for:',
+        options: ['a) Zero order', 'b) First order', 'c) Second order', 'd) Third order'],
+        answer: 'b) First order'
+      },
+      {
+        id: 29,
+        subject: 'chemistry',
+        unit: 'coordination',
+        unitLabel: 'Coordination Compounds',
+        question: 'The oxidation state of Co in [Co(NH₃)₆]Cl₃ is:',
+        options: ['a) +2', 'b) +3', 'c) 0', 'd) –3'],
+        answer: 'b) +3'
+      },
+      {
+        id: 30,
+        subject: 'chemistry',
+        unit: 'coordination',
+        unitLabel: 'Coordination Compounds',
+        question: 'The ligand CN⁻ is:',
+        options: ['a) Neutral', 'b) Monodentate', 'c) Bidentate', 'd) Tridentate'],
+        answer: 'b) Monodentate'
+      },
+      {
+        id: 31,
+        subject: 'chemistry',
+        unit: 'coordination',
+        unitLabel: 'Coordination Compounds',
+        question: 'The geometry of [Ni(CO)₄] is:',
+        options: ['a) Square planar', 'b) Tetrahedral', 'c) Octahedral', 'd) Linear'],
+        answer: 'b) Tetrahedral'
+      },
+      {
+        id: 32,
+        subject: 'chemistry',
+        unit: 'alcohols',
+        unitLabel: 'Alcohols, Phenols & Ethers',
+        question: 'Phenol reacts with bromine water to give:',
+        options: ['a) o-bromophenol', 'b) p-bromophenol', 'c) 2,4,6-tribromophenol', 'd) Bromobenzene'],
+        answer: 'c) 2,4,6-tribromophenol'
+      },
+      {
+        id: 33,
+        subject: 'chemistry',
+        unit: 'alcohols',
+        unitLabel: 'Alcohols, Phenols & Ethers',
+        question: 'Dehydration of alcohols gives:',
+        options: ['a) Alkanes', 'b) Alkenes', 'c) Alkynes', 'd) Aldehydes'],
+        answer: 'b) Alkenes'
+      },
+      {
+        id: 34,
+        subject: 'chemistry',
+        unit: 'carbonyls',
+        unitLabel: 'Aldehydes & Ketones',
+        question: 'Aldehydes give positive:',
+        options: ['a) Tollen’s test', 'b) Fehling’s test', 'c) Both (a) & (b)', 'd) None'],
+        answer: 'c) Both (a) & (b)'
+      },
+      {
+        id: 35,
+        subject: 'chemistry',
+        unit: 'carbonyls',
+        unitLabel: 'Aldehydes & Ketones',
+        question: 'The product of reduction of a ketone is:',
+        options: ['a) Primary alcohol', 'b) Secondary alcohol', 'c) Tertiary alcohol', 'd) Ether'],
+        answer: 'b) Secondary alcohol'
+      },
+      {
+        id: 36,
+        subject: 'chemistry',
+        unit: 'carboxylic',
+        unitLabel: 'Carboxylic Acids',
+        question: 'Correct acidic strength order is:',
+        options: ['a) Formic > Acetic', 'b) Acetic > Formic', 'c) Benzoic > Formic', 'd) Alcohol > Formic'],
+        answer: 'a) Formic > Acetic'
+      },
+      {
+        id: 37,
+        subject: 'chemistry',
+        unit: 'amines',
+        unitLabel: 'Amines',
+        question: 'Hinsberg reagent is used to distinguish:',
+        options: ['a) 1°, 2°, 3° alcohols', 'b) 1°, 2°, 3° amines', 'c) Aromatic hydrocarbons', 'd) Aldehydes'],
+        answer: 'b) 1°, 2°, 3° amines'
+      },
+      {
+        id: 38,
+        subject: 'chemistry',
+        unit: 'amines',
+        unitLabel: 'Amines',
+        question: 'Aniline is less basic due to:',
+        options: ['a) +I effect', 'b) –I effect', 'c) Resonance', 'd) Steric hindrance'],
+        answer: 'c) Resonance'
+      },
+      {
+        id: 39,
+        subject: 'chemistry',
+        unit: 'biomolecules',
+        unitLabel: 'Biomolecules',
+        question: 'Glucose is a:',
+        options: ['a) Disaccharide', 'b) Polysaccharide', 'c) Monosaccharide', 'd) Trisaccharide'],
+        answer: 'c) Monosaccharide'
+      },
+      {
+        id: 40,
+        subject: 'chemistry',
+        unit: 'biomolecules',
+        unitLabel: 'Biomolecules',
+        question: 'DNA contains:',
+        options: ['a) Ribose', 'b) Deoxyribose', 'c) Glucose', 'd) Fructose'],
+        answer: 'b) Deoxyribose'
+      },
+      {
+        id: 41,
+        subject: 'chemistry',
+        unit: 'polymers',
+        unitLabel: 'Polymers',
+        question: 'Nylon-6,6 is made from:',
+        options: ['a) Adipic acid + hexamethylene diamine', 'b) Ethylene + oxygen', 'c) Styrene', 'd) Isoprene'],
+        answer: 'a) Adipic acid + hexamethylene diamine'
+      },
+      {
+        id: 42,
+        subject: 'chemistry',
+        unit: 'polymers',
+        unitLabel: 'Polymers',
+        question: 'Buna-S is a copolymer of:',
+        options: ['a) Styrene + butadiene', 'b) Acrylonitrile + butadiene', 'c) Vinyl chloride + ethylene', 'd) Propylene + benzene'],
+        answer: 'a) Styrene + butadiene'
+      },
+      {
+        id: 43,
+        subject: 'physics',
+        unit: 'electric-fields',
+        unitLabel: 'Electric Charges & Fields',
+        question: 'The SI unit of electric charge is:',
+        options: ['a) Volt', 'b) Coulomb', 'c) Farad', 'd) Ohm'],
+        answer: 'b) Coulomb'
+      },
+      {
+        id: 44,
+        subject: 'physics',
+        unit: 'electric-fields',
+        unitLabel: 'Electric Charges & Fields',
+        question: 'Electric field inside a conductor is:',
+        options: ['a) Maximum', 'b) Minimum', 'c) Zero', 'd) Infinite'],
+        answer: 'c) Zero'
+      },
+      {
+        id: 45,
+        subject: 'physics',
+        unit: 'electric-fields',
+        unitLabel: 'Electric Charges & Fields',
+        question: 'Coulomb’s law is valid for:',
+        options: ['a) Moving charges', 'b) Point charges', 'c) Charges in motion only', 'd) Magnetic charges'],
+        answer: 'b) Point charges'
+      },
+      {
+        id: 46,
+        subject: 'physics',
+        unit: 'electrostatics',
+        unitLabel: 'Electrostatic Potential & Capacitance',
+        question: 'Capacitance of a parallel plate capacitor is proportional to:',
+        options: ['a) Distance between plates', 'b) Area of plates', 'c) Inversely proportional to area', 'd) Inversely proportional to permittivity'],
+        answer: 'b) Area of plates'
+      },
+      {
+        id: 47,
+        subject: 'physics',
+        unit: 'electrostatics',
+        unitLabel: 'Electrostatic Potential & Capacitance',
+        question: 'Unit of electric potential is:',
+        options: ['a) J', 'b) J/C', 'c) C/J', 'd) W'],
+        answer: 'b) J/C'
+      },
+      {
+        id: 48,
+        subject: 'physics',
+        unit: 'electrostatics',
+        unitLabel: 'Electrostatic Potential & Capacitance',
+        question: 'A dielectric increases capacitance because it:',
+        options: ['a) Decreases electric field', 'b) Increases charge', 'c) Decreases distance', 'd) Increases power'],
+        answer: 'a) Decreases electric field'
+      },
+      {
+        id: 49,
+        subject: 'physics',
+        unit: 'current-electricity',
+        unitLabel: 'Current Electricity',
+        question: 'The SI unit of resistance is:',
+        options: ['a) Volt', 'b) Ohm', 'c) Ampere', 'd) Farad'],
+        answer: 'b) Ohm'
+      },
+      {
+        id: 50,
+        subject: 'physics',
+        unit: 'current-electricity',
+        unitLabel: 'Current Electricity',
+        question: 'A good conductor has:',
+        options: ['a) High resistivity', 'b) Low resistivity', 'c) High resistance', 'd) Zero conductivity'],
+        answer: 'b) Low resistivity'
+      },
+      {
+        id: 51,
+        subject: 'physics',
+        unit: 'current-electricity',
+        unitLabel: 'Current Electricity',
+        question: 'Drift velocity is:',
+        options: ['a) Velocity of ions', 'b) Average velocity of electrons', 'c) Thermal velocity', 'd) Escape velocity'],
+        answer: 'b) Average velocity of electrons'
+      },
+      {
+        id: 52,
+        subject: 'physics',
+        unit: 'moving-charges',
+        unitLabel: 'Moving Charges & Magnetism',
+        question: 'A moving charge produces:',
+        options: ['a) Only electric field', 'b) Only magnetic field', 'c) Both electric & magnetic fields', 'd) No field'],
+        answer: 'c) Both electric & magnetic fields'
+      },
+      {
+        id: 53,
+        subject: 'physics',
+        unit: 'moving-charges',
+        unitLabel: 'Moving Charges & Magnetism',
+        question: 'SI unit of magnetic field (B) is:',
+        options: ['a) Henry', 'b) Tesla', 'c) Weber', 'd) Ampere'],
+        answer: 'b) Tesla'
+      },
+      {
+        id: 54,
+        subject: 'physics',
+        unit: 'moving-charges',
+        unitLabel: 'Moving Charges & Magnetism',
+        question: 'The direction of magnetic force is given by:',
+        options: ['a) Fleming’s left-hand rule', 'b) Fleming’s right-hand rule', 'c) Lenz’s law', 'd) Ampere’s law'],
+        answer: 'a) Fleming’s left-hand rule'
+      },
+      {
+        id: 55,
+        subject: 'physics',
+        unit: 'magnetism-matter',
+        unitLabel: 'Magnetism & Matter',
+        question: 'A paramagnetic substance has:',
+        options: ['a) Zero susceptibility', 'b) Negative susceptibility', 'c) Positive susceptibility (small)', 'd) Very high susceptibility'],
+        answer: 'c) Positive susceptibility (small)'
+      },
+      {
+        id: 56,
+        subject: 'physics',
+        unit: 'magnetism-matter',
+        unitLabel: 'Magnetism & Matter',
+        question: 'Earth’s magnetic field is due to:',
+        options: ['a) Sun', 'b) Rotation of Earth', 'c) Dynamo effect in Earth’s core', 'd) Atmosphere'],
+        answer: 'c) Dynamo effect in Earth’s core'
+      },
+      {
+        id: 57,
+        subject: 'physics',
+        unit: 'emi',
+        unitLabel: 'Electromagnetic Induction',
+        question: 'Lenz’s law is based on:',
+        options: ['a) Conservation of mass', 'b) Conservation of charge', 'c) Conservation of energy', 'd) Conservation of momentum'],
+        answer: 'c) Conservation of energy'
+      },
+      {
+        id: 58,
+        subject: 'physics',
+        unit: 'emi',
+        unitLabel: 'Electromagnetic Induction',
+        question: 'The SI unit of magnetic flux is:',
+        options: ['a) Tesla', 'b) Weber', 'c) Tesla/meter', 'd) Ampere/meter'],
+        answer: 'b) Weber'
+      },
+      {
+        id: 59,
+        subject: 'physics',
+        unit: 'ac',
+        unitLabel: 'Alternating Current',
+        question: 'Power factor of a pure resistor is:',
+        options: ['a) 0', 'b) 1', 'c) -1', 'd) 0.5'],
+        answer: 'b) 1'
+      },
+      {
+        id: 60,
+        subject: 'physics',
+        unit: 'ac',
+        unitLabel: 'Alternating Current',
+        question: 'In an AC circuit with only capacitor, current:',
+        options: ['a) Leads voltage', 'b) Lags voltage', 'c) Equals voltage', 'd) Is zero'],
+        answer: 'a) Leads voltage'
+      },
+      {
+        id: 61,
+        subject: 'physics',
+        unit: 'ac',
+        unitLabel: 'Alternating Current',
+        question: 'RMS value of AC is:',
+        options: ['a) Peak value', 'b) 0', 'c) V₀ / √2', 'd) V₀ × √2'],
+        answer: 'c) V₀ / √2'
+      },
+      {
+        id: 62,
+        subject: 'physics',
+        unit: 'em-waves',
+        unitLabel: 'Electromagnetic Waves',
+        question: 'Electromagnetic waves are:',
+        options: ['a) Longitudinal', 'b) Transverse', 'c) Mechanical', 'd) None'],
+        answer: 'b) Transverse'
+      },
+      {
+        id: 63,
+        subject: 'physics',
+        unit: 'em-waves',
+        unitLabel: 'Electromagnetic Waves',
+        question: 'Which has the highest frequency?',
+        options: ['a) Radio waves', 'b) Infrared', 'c) UV', 'd) Gamma rays'],
+        answer: 'd) Gamma rays'
+      },
+      {
+        id: 64,
+        subject: 'physics',
+        unit: 'ray-optics',
+        unitLabel: 'Ray Optics',
+        question: 'Focal length of a concave lens is:',
+        options: ['a) Positive', 'b) Negative', 'c) Zero', 'd) Infinite'],
+        answer: 'b) Negative'
+      },
+      {
+        id: 65,
+        subject: 'physics',
+        unit: 'ray-optics',
+        unitLabel: 'Ray Optics',
+        question: 'Mirror formula is:',
+        options: ['a) 1/f = 1/v + 1/u', 'b) f = v + u', 'c) f = uv', 'd) 1/u = 1/v'],
+        answer: 'a) 1/f = 1/v + 1/u'
+      },
+      {
+        id: 66,
+        subject: 'physics',
+        unit: 'ray-optics',
+        unitLabel: 'Ray Optics',
+        question: 'Total internal reflection occurs when:',
+        options: ['a) Light goes from rarer to denser', 'b) Light goes from denser to rarer', 'c) Angle of incidence less than critical angle', 'd) Only in vacuum'],
+        answer: 'b) Light goes from denser to rarer'
+      },
+      {
+        id: 67,
+        subject: 'physics',
+        unit: 'wave-optics',
+        unitLabel: 'Wave Optics',
+        question: 'Young’s double slit experiment proves:',
+        options: ['a) Particle nature', 'b) Wave nature', 'c) Dual nature', 'd) Photoelectric effect'],
+        answer: 'b) Wave nature'
+      },
+      {
+        id: 68,
+        subject: 'physics',
+        unit: 'wave-optics',
+        unitLabel: 'Wave Optics',
+        question: 'Polarisation is possible only for:',
+        options: ['a) Sound waves', 'b) Pressure waves', 'c) Transverse waves', 'd) All waves'],
+        answer: 'c) Transverse waves'
+      },
+      {
+        id: 69,
+        subject: 'physics',
+        unit: 'dual-nature',
+        unitLabel: 'Dual Nature of Radiation & Matter',
+        question: 'Photoelectric effect proves:',
+        options: ['a) Wave nature', 'b) Particle nature', 'c) Both', 'd) None'],
+        answer: 'b) Particle nature'
+      },
+      {
+        id: 70,
+        subject: 'physics',
+        unit: 'dual-nature',
+        unitLabel: 'Dual Nature of Radiation & Matter',
+        question: 'Unit of Planck’s constant is:',
+        options: ['a) J', 'b) J·s', 'c) J/m', 'd) W'],
+        answer: 'b) J·s'
+      },
+      {
+        id: 71,
+        subject: 'physics',
+        unit: 'atoms-nuclei',
+        unitLabel: 'Atoms & Nuclei',
+        question: 'The charge of a proton is:',
+        options: ['a) –1.6 × 10⁻¹⁹ C', 'b) 0', 'c) +1.6 × 10⁻¹⁹ C', 'd) +1 C'],
+        answer: 'c) +1.6 × 10⁻¹⁹ C'
+      },
+      {
+        id: 72,
+        subject: 'physics',
+        unit: 'atoms-nuclei',
+        unitLabel: 'Atoms & Nuclei',
+        question: 'Nuclear forces are:',
+        options: ['a) Long range', 'b) Very short range', 'c) Gravitational', 'd) Electromagnetic'],
+        answer: 'b) Very short range'
+      },
+      {
+        id: 73,
+        subject: 'physics',
+        unit: 'semiconductors',
+        unitLabel: 'Semiconductor Electronics',
+        question: 'A semiconductor has conductivity:',
+        options: ['a) Zero', 'b) Very high', 'c) Between conductor and insulator', 'd) Infinite'],
+        answer: 'c) Between conductor and insulator'
+      },
+      {
+        id: 74,
+        subject: 'physics',
+        unit: 'semiconductors',
+        unitLabel: 'Semiconductor Electronics',
+        question: 'Example of an intrinsic semiconductor:',
+        options: ['a) Si', 'b) Ge', 'c) Both (a) & (b)', 'd) Cu'],
+        answer: 'c) Both (a) & (b)'
+      },
+      {
+        id: 75,
+        subject: 'physics',
+        unit: 'semiconductors',
+        unitLabel: 'Semiconductor Electronics',
+        question: 'In a p–n junction, majority charge carriers in p-type are:',
+        options: ['a) Electrons', 'b) Holes', 'c) Neutrons', 'd) Protons'],
+        answer: 'b) Holes'
+      }
+    ];
+
+    console.log('📝 Total questions loaded:', questions.length);
+    console.log('🎯 Initializing quiz interface...');
+    
+    const quizGrid = document.getElementById('quiz-grid');
+    const emptyState = document.getElementById('empty-state');
+    const searchInput = document.getElementById('quiz-search');
+    const submitBtn = document.getElementById('submit-quiz');
+    const statusBanner = document.getElementById('quiz-status');
+
+    function createCard({ id, subject, unit, unitLabel, question, options, answer }) {
+      const card = document.createElement('div');
+      card.className = 'quiz-card';
+      card.dataset.unit = unit;
+      card.dataset.subject = subject;
+      card.dataset.text = [question, ...options].join(' ').toLowerCase();
+      card.dataset.correct = normalize(answer);
+
+      const number = document.createElement('span');
+      number.className = 'question-number';
+      number.textContent = `Question ${id}`;
+
+      const text = document.createElement('p');
+      text.className = 'question-text';
+      text.textContent = question;
+
+      const topic = document.createElement('p');
+      topic.className = 'topic';
+      topic.textContent = `Unit • ${unitLabel}`;
+
+      const optionsList = document.createElement('div');
+      optionsList.className = 'options-list';
+
+      options.forEach((opt, index) => {
+        const optionId = `question-${id}-opt-${index}`;
+        const label = document.createElement('label');
+        label.className = 'option-row';
+        const input = document.createElement('input');
+        input.type = 'radio';
+        input.name = `question-${id}`;
+        input.value = opt;
+        input.id = optionId;
+        const span = document.createElement('span');
+        span.textContent = opt;
+        label.append(input, span);
+        optionsList.append(label);
+      });
+
+      card.append(number, text, topic, optionsList);
+      return card;
+    }
+
+    function renderCards() {
+      quizGrid.innerHTML = '';
+      questions.forEach(q => quizGrid.appendChild(createCard(q)));
+    }
+
+    function applyFilters() {
+      const activeSubject = document.querySelector('.subject-pill.active');
+      const subjectFilter = activeSubject ? activeSubject.dataset.subject : 'all';
+      const activeTopic = document.querySelector('.topic-pill.active');
+      const topicFilter = activeTopic ? activeTopic.dataset.filter : 'all';
+      const query = searchInput.value.trim().toLowerCase();
+
+      let visibleCount = 0;
+      quizGrid.querySelectorAll('.quiz-card').forEach(card => {
+        const matchesSubject = subjectFilter === 'all' || card.dataset.subject === subjectFilter;
+        const matchesTopic = topicFilter === 'all' || card.dataset.unit === topicFilter;
+        const matchesSearch = !query || card.dataset.text.includes(query);
+        const isVisible = matchesSubject && matchesTopic && matchesSearch;
+        card.style.display = isVisible ? 'block' : 'none';
+        if (isVisible) visibleCount += 1;
+      });
+
+      emptyState.hidden = visibleCount !== 0;
+    }
+
+    function normalize(text) {
+      return text.replace(/\s+/g, ' ').trim().toLowerCase();
+    }
+
+    function evaluateQuiz() {
+      console.log('=== EVALUATING QUIZ ===');
+      console.log('Total questions:', questions.length);
+      
+      const summary = {
+        timestamp: new Date().toISOString(),
+        overall: { correct: 0, total: questions.length, answered: 0 },
+        subjects: {},
+      };
+
+      questions.forEach(q => {
+        const selection = document.querySelector(`input[name="question-${q.id}"]:checked`);
+        const normalizedAnswer = normalize(q.answer);
+        
+        if (!summary.subjects[q.subject]) {
+          summary.subjects[q.subject] = { correct: 0, total: 0, answered: 0 };
+        }
+        
+        const stats = summary.subjects[q.subject];
+        stats.total += 1;
+        
+        if (selection) {
+          stats.answered += 1;
+          summary.overall.answered += 1;
+          
+          const userAnswer = normalize(selection.value);
+          const isCorrect = userAnswer === normalizedAnswer;
+          
+          console.log(`Q${q.id} (${q.subject}): Selected="${selection.value}" | Correct="${q.answer}" | Match=${isCorrect}`);
+          
+          if (isCorrect) {
+            stats.correct += 1;
+            summary.overall.correct += 1;
+          }
+        } else {
+          console.log(`Q${q.id} (${q.subject}): NOT ANSWERED`);
+        }
+      });
+
+      console.log('Final Summary:', summary);
+      console.log('Overall:', summary.overall);
+      console.log('Subjects:', summary.subjects);
+      console.log('Saving to localStorage...');
+      
+      try {
+        const jsonString = JSON.stringify(summary);
+        localStorage.setItem('quizResults', jsonString);
+        console.log('✅ Successfully saved to localStorage');
+        
+        // Verify it was saved
+        const verification = localStorage.getItem('quizResults');
+        if (verification) {
+          console.log('✅ Verification successful - data exists in localStorage');
+          console.log('Stored data:', JSON.parse(verification));
+        } else {
+          console.error('❌ Verification failed - data NOT in localStorage');
+        }
+      } catch (error) {
+        console.error('❌ Error saving to localStorage:', error);
+      }
+      
+      return summary;
+    }
+
+    document.querySelectorAll('.subject-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        document.querySelectorAll('.subject-pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        applyFilters();
+      });
+    });
+    document.querySelectorAll('.topic-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        document.querySelectorAll('.topic-pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        applyFilters();
+      });
+    });
+
+    searchInput.addEventListener('input', applyFilters);
+    
+    submitBtn.addEventListener('click', () => {
+      console.log('\n=== SUBMIT BUTTON CLICKED ===');
+      
+      const summary = evaluateQuiz();
+      const totalAnswered = summary.overall.answered;
+      const totalQuestions = summary.overall.total;
+      const totalCorrect = summary.overall.correct;
+      
+      console.log(`\nResults: ${totalCorrect} correct out of ${totalAnswered} answered (${totalQuestions} total)`);
+      console.log('Biology:', summary.subjects.biology);
+      console.log('Chemistry:', summary.subjects.chemistry);
+      console.log('Physics:', summary.subjects.physics);
+      
+      if (totalAnswered === 0) {
+        statusBanner.textContent = '⚠️ Please answer at least one question before submitting.';
+        statusBanner.style.background = '#fef3c7';
+        statusBanner.style.color = '#92400e';
+      } else {
+        statusBanner.textContent = `✅ Submitted successfully! Answered ${totalAnswered} of ${totalQuestions} questions. Go to Results page to view your performance.`;
+        statusBanner.classList.add('success');
+        console.log('\n✅ Quiz submitted! Navigate to RESULTS.html to view percentages.');
+      }
+    });
+
+    renderCards();
+    applyFilters();
+  </script>
+</body>
+</html>
+

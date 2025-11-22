@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Email Triage Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div id="app" class="h-screen flex flex-col">
+        <!-- Header -->
+        <header class="bg-white border-b border-gray-200 px-6 py-4 shadow-sm">
+            <h1 class="text-2xl font-bold text-gray-900">Smart Email Triage Tool</h1>
+        </header>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex overflow-hidden">
+            <!-- Sidebar Filters -->
+            <div class="w-64 bg-gray-50 border-r border-gray-200 p-4 overflow-y-auto">
+                <h2 class="text-xl font-bold mb-6 text-gray-800">Filters</h2>
+                
+                <!-- Priority Filter -->
+                <div class="mb-8">
+                    <h3 class="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">Priority</h3>
+                    <div id="priority-filters" class="space-y-2"></div>
+                </div>
+
+                <!-- Category Filter -->
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">Category</h3>
+                    <div id="category-filters" class="space-y-2"></div>
+                </div>
+
+                <!-- Triage All Button -->
+                <div class="mt-8">
+                    <button id="triage-all-btn" class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium">
+                        Triage All Emails
+                    </button>
+                </div>
+
+                <!-- Manage Blocked Senders -->
+                <div class="mt-4">
+                    <button onclick="showBlockedSenders()" class="w-full px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors text-sm font-medium">
+                        Manage Blocked Senders
+                    </button>
+                </div>
+
+                <!-- Info -->
+                <div class="mt-6 p-3 bg-blue-50 rounded-lg text-xs text-gray-600">
+                    <p class="font-semibold mb-1">💡 Tip:</p>
+                    <p>Click "Triage All Emails" to categorize and prioritize emails. Filters will work after triaging.</p>
+                </div>
+            </div>
+
+            <!-- Email List -->
+            <div class="flex-1 flex flex-col bg-white border-r border-gray-200">
+                <div id="email-list" class="flex-1 overflow-y-auto"></div>
+            </div>
+
+            <!-- Email Detail -->
+            <div id="email-detail" class="w-1/2 border-l border-gray-200 bg-white overflow-y-auto">
+                <div class="flex items-center justify-center h-full text-gray-500">
+                    <p>Select an email to view details</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_BASE_URL = 'http://localhost:8001';
+        
+        // State
+        let emails = [];
+        let selectedEmail = null;
+        let currentPriority = 'all';
+        let currentCategory = 'all';
+
+        // Priority and Category options
+        const priorities = ['all', 'P0-Critical', 'P1-High', 'P2-Normal', 'P3-Low', 'P4-Spam'];
+        const categories = ['all', 'Work/Projects', 'Deadlines/Meetings', 'Personal', 'Finance/Bills', 'Notifications/Updates', 'Newsletters/Promotions', 'Spam'];
+
+        // Priority colors
+        const priorityColors = {
+            'P0-Critical': 'bg-red-600',
+            'P1-High': 'bg-orange-500',
+            'P2-Normal': 'bg-blue-500',
+            'P3-Low': 'bg-gray-500',
+            'P4-Spam': 'bg-gray-700'
+        };
+
+        // Initialize filters
+        function initFilters() {
+            const priorityContainer = document.getElementById('priority-filters');
+            const categoryContainer = document.getElementById('category-filters');
+
+            priorities.forEach(priority => {
+                const btn = document.createElement('button');
+                btn.className = `w-full text-left px-3 py-2 rounded-md transition-colors ${
+                    priority === 'all' ? 'bg-blue-100 text-blue-800 font-medium' : 'hover:bg-gray-100 text-gray-700'
+                }`;
+                
+                // Show short label for priorities
+                if (priority === 'all') {
+                    btn.textContent = 'All';
+                } else if (priority.includes('-')) {
+                    const parts = priority.split('-');
+                    btn.innerHTML = `<div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full ${priorityColors[priority] || 'bg-gray-400'}"></span><span>${parts[0]}</span></div>`;
+                } else {
+                    btn.textContent = priority;
+                }
+                
+                btn.onclick = () => filterByPriority(priority);
+                priorityContainer.appendChild(btn);
+            });
+
+            categories.forEach(category => {
+                const btn = document.createElement('button');
+                btn.className = `w-full text-left px-3 py-2 rounded-md transition-colors ${
+                    category === 'all' ? 'bg-blue-100 text-blue-800 font-medium' : 'hover:bg-gray-100 text-gray-700'
+                }`;
+                btn.textContent = category === 'all' ? 'All' : category;
+                btn.onclick = () => filterByCategory(category);
+                categoryContainer.appendChild(btn);
+            });
+        }
+
+        // Filter functions
+        function filterByPriority(priority) {
+            currentPriority = priority;
+            updateFilterUI();
+            fetchEmails();
+        }
+
+        function filterByCategory(category) {
+            currentCategory = category;
+            updateFilterUI();
+            fetchEmails();
+        }
+
+        function updateFilterUI() {
+            document.querySelectorAll('#priority-filters button').forEach((btn, idx) => {
+                const priority = priorities[idx];
+                const isActive = priority === currentPriority;
+                btn.className = `w-full text-left px-3 py-2 rounded-md transition-colors ${
+                    isActive ? 'bg-blue-100 text-blue-800 font-medium' : 'hover:bg-gray-100 text-gray-700'
+                }`;
+                
+                // Update button content
+                if (priority === 'all') {
+                    btn.textContent = 'All';
+                } else if (priority.includes('-')) {
+                    const parts = priority.split('-');
+                    btn.innerHTML = `<div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full ${priorityColors[priority] || 'bg-gray-400'}"></span><span>${parts[0]}</span></div>`;
+                } else {
+                    btn.textContent = priority;
+                }
+            });
+
+            document.querySelectorAll('#category-filters button').forEach((btn, idx) => {
+                const category = categories[idx];
+                const isActive = category === currentCategory;
+                btn.className = `w-full text-left px-3 py-2 rounded-md transition-colors ${
+                    isActive ? 'bg-blue-100 text-blue-800 font-medium' : 'hover:bg-gray-100 text-gray-700'
+                }`;
+            });
+        }
+
+        // Fetch emails from API
+        async function fetchEmails() {
+            try {
+                let url = `${API_BASE_URL}/emails`;
+                const params = new URLSearchParams();
+                
+                if (currentPriority !== 'all') params.append('priority', currentPriority);
+                if (currentCategory !== 'all') params.append('category', currentCategory);
+                
+                if (params.toString()) url += `?${params.toString()}`;
+
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Failed to fetch emails');
+                
+                emails = await response.json();
+                
+                // Filter out blocked and deleted emails
+                emails = filterBlockedAndDeleted(emails);
+                
+                renderEmailList();
+            } catch (error) {
+                console.error('Error fetching emails:', error);
+                showError('Failed to load emails. Make sure backend is running on http://localhost:8000');
+            }
+        }
+
+        // Render email list
+        function renderEmailList() {
+            const container = document.getElementById('email-list');
+            
+            if (emails.length === 0) {
+                container.innerHTML = '<div class="flex-1 flex items-center justify-center text-gray-500"><p>No emails found</p></div>';
+                return;
+            }
+
+            container.innerHTML = '<div class="divide-y divide-gray-200">' + 
+                emails.map(email => {
+                    const priority = email.triage_result?.priority || 'P2-Normal';
+                    const category = email.triage_result?.category || 'Uncategorized';
+                    const priorityLabel = priority.split('-')[0];
+                    const priorityColor = priorityColors[priority] || 'bg-gray-400';
+                    
+                    return `
+                        <div class="p-4 cursor-pointer hover:bg-gray-50 ${email.is_read ? 'bg-gray-50' : 'bg-white'}" 
+                             onclick="selectEmail(${email.id})">
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <span class="font-semibold text-gray-900 truncate">${email.from_name}</span>
+                                        ${!email.is_read ? '<span class="w-2 h-2 bg-blue-500 rounded-full"></span>' : ''}
+                                    </div>
+                                    <p class="text-sm font-medium text-gray-800 mb-1 truncate">${email.subject}</p>
+                                    <p class="text-xs text-gray-500 truncate">${email.from_email}</p>
+                                </div>
+                                <div class="flex flex-col items-end gap-2">
+                                    <span class="text-xs text-gray-500">${formatDate(email.received_at)}</span>
+                                    ${email.triage_result ? `
+                                        <div class="flex gap-1">
+                                            <span class="px-2 py-0.5 text-xs font-medium text-white rounded ${priorityColor}">${priorityLabel}</span>
+                                            <span class="px-2 py-0.5 text-xs font-medium text-gray-700 bg-gray-200 rounded">${category}</span>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('') + '</div>';
+        }
+
+        // Select and display email
+        function selectEmail(emailId) {
+            selectedEmail = emails.find(e => e.id === emailId);
+            if (!selectedEmail) return;
+            
+            const priority = selectedEmail.triage_result?.priority || 'P2-Normal';
+            const category = selectedEmail.triage_result?.category || 'Uncategorized';
+            const priorityLabel = priority.split('-')[0];
+            const priorityColor = priorityColors[priority] || 'bg-gray-400';
+            const actions = selectedEmail.triage_result?.suggested_actions || [];
+
+            const detailHTML = `
+                <div class="border-b border-gray-200 p-4 bg-gray-50">
+                    <button onclick="closeDetail()" class="text-gray-500 hover:text-gray-700 text-sm mb-3">← Back</button>
+                    <h1 class="text-xl font-bold text-gray-900 mb-2">${selectedEmail.subject}</h1>
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="px-2 py-1 text-xs font-medium text-white rounded ${priorityColor}">${priorityLabel}</span>
+                        <span class="px-2 py-1 text-xs font-medium text-gray-700 bg-gray-200 rounded">${category}</span>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="mb-6 pb-6 border-b border-gray-200">
+                        <div class="space-y-2 text-sm">
+                            <div><span class="font-semibold text-gray-700">From: </span><span class="text-gray-900">${selectedEmail.from_name}</span> &lt;${selectedEmail.from_email}&gt;</div>
+                            <div><span class="font-semibold text-gray-700">To: </span><span class="text-gray-900">${selectedEmail.to_email}</span></div>
+                            <div><span class="font-semibold text-gray-700">Received: </span><span class="text-gray-900">${new Date(selectedEmail.received_at).toLocaleString()}</span></div>
+                        </div>
+                    </div>
+                    <div class="mb-6">
+                        <h2 class="text-sm font-semibold text-gray-700 mb-2">Message</h2>
+                        <div class="bg-gray-50 rounded-lg p-4 whitespace-pre-wrap text-gray-900">${selectedEmail.body_text}</div>
+                    </div>
+                    ${selectedEmail.triage_result?.reason ? `
+                        <div class="mb-6">
+                            <h2 class="text-sm font-semibold text-gray-700 mb-2">Triage Reason</h2>
+                            <div class="bg-blue-50 rounded-lg p-4 text-sm text-gray-800">${selectedEmail.triage_result.reason}</div>
+                        </div>
+                    ` : ''}
+                    ${actions.length > 0 ? `
+                        <div class="mb-6">
+                            <h2 class="text-sm font-semibold text-gray-700 mb-3">Suggested Actions</h2>
+                            <div class="flex flex-wrap gap-2">
+                                ${actions.map(action => `<button class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium">${action}</button>`).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                    <div class="mb-6">
+                        <h2 class="text-sm font-semibold text-gray-700 mb-3">Email Actions</h2>
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="replyEmail(${selectedEmail.id})" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-sm font-medium flex items-center gap-2">
+                                <span>↩</span> Reply
+                            </button>
+                            <button onclick="markAsSpam(${selectedEmail.id})" class="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors text-sm font-medium flex items-center gap-2">
+                                <span>⚠</span> Report Spam
+                            </button>
+                            <button onclick="blockSender('${selectedEmail.from_email}')" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors text-sm font-medium flex items-center gap-2">
+                                <span>🚫</span> Block Sender
+                            </button>
+                            <button onclick="deleteEmail(${selectedEmail.id})" class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors text-sm font-medium flex items-center gap-2">
+                                <span>🗑</span> Delete
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mb-6">
+                        <div class="flex items-center justify-between mb-3">
+                            <h2 class="text-sm font-semibold text-gray-700">AI Reply Draft</h2>
+                            <button onclick="generateDraft(${selectedEmail.id})" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-sm font-medium">
+                                Generate AI Reply
+                            </button>
+                        </div>
+                        <textarea id="draft-area" placeholder="Click 'Generate AI Reply' to create a draft..." class="w-full h-48 p-4 border border-gray-300 rounded-lg resize-none"></textarea>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('email-detail').innerHTML = detailHTML;
+        }
+
+        function closeDetail() {
+            selectedEmail = null;
+            document.getElementById('email-detail').innerHTML = `
+                <div class="flex items-center justify-center h-full text-gray-500">
+                    <p>Select an email to view details</p>
+                </div>
+            `;
+        }
+
+        // Generate AI reply draft
+        async function generateDraft(emailId) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/emails/${emailId}/draft-reply`, {
+                    method: 'POST'
+                });
+                if (!response.ok) throw new Error('Failed to generate draft');
+                
+                const data = await response.json();
+                document.getElementById('draft-area').value = data.draft;
+            } catch (error) {
+                console.error('Error generating draft:', error);
+                alert('Failed to generate draft. Make sure backend is running.');
+            }
+        }
+
+        // Triage all emails
+        async function triageAll() {
+            try {
+                const btn = document.getElementById('triage-all-btn');
+                btn.disabled = true;
+                btn.textContent = 'Triaging...';
+                
+                const response = await fetch(`${API_BASE_URL}/emails/triage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email_ids: null })
+                });
+                
+                if (!response.ok) throw new Error('Failed to triage emails');
+                
+                btn.textContent = 'Triage All Emails';
+                btn.disabled = false;
+                
+                // Refresh email list
+                await fetchEmails();
+                alert('All emails have been triaged!');
+            } catch (error) {
+                console.error('Error triaging emails:', error);
+                alert('Failed to triage emails. Make sure backend is running.');
+                document.getElementById('triage-all-btn').disabled = false;
+                document.getElementById('triage-all-btn').textContent = 'Triage All Emails';
+            }
+        }
+
+        // Helper functions
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+            const diffDays = Math.floor(diffHours / 24);
+
+            if (diffHours < 1) return 'Just now';
+            if (diffHours < 24) return `${diffHours}h ago`;
+            if (diffDays < 7) return `${diffDays}d ago`;
+            return date.toLocaleDateString();
+        }
+
+        function showError(message) {
+            document.getElementById('email-list').innerHTML = `
+                <div class="flex-1 flex items-center justify-center">
+                    <div class="text-center">
+                        <p class="text-red-600 mb-2">${message}</p>
+                        <p class="text-sm text-gray-500">Make sure the backend is running on http://localhost:8000</p>
+                        <button onclick="fetchEmails()" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Retry</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Event listeners
+        document.getElementById('triage-all-btn').addEventListener('click', triageAll);
+
+        // Reply to email
+        function replyEmail(emailId) {
+            const email = emails.find(e => e.id === emailId);
+            if (!email) return;
+
+            const replySubject = email.subject.startsWith('Re:') ? email.subject : `Re: ${email.subject}`;
+            const mailtoLink = `mailto:${email.from_email}?subject=${encodeURIComponent(replySubject)}`;
+            
+            const draftText = document.getElementById('draft-area')?.value;
+            if (draftText && draftText.trim()) {
+                window.location.href = mailtoLink + `&body=${encodeURIComponent(draftText)}`;
+            } else {
+                window.location.href = mailtoLink;
+            }
+        }
+
+        // Mark email as spam
+        async function markAsSpam(emailId) {
+            if (!confirm('Mark this email as spam? This will help train the AI to recognize similar emails.')) {
+                return;
+            }
+
+            try {
+                // Triage the email as spam
+                const response = await fetch(`${API_BASE_URL}/emails/triage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email_ids: [emailId] })
+                });
+
+                if (!response.ok) throw new Error('Failed to mark as spam');
+
+                // Store spam sender in localStorage for blocking
+                const email = emails.find(e => e.id === emailId);
+                if (email) {
+                    const spamList = JSON.parse(localStorage.getItem('spamSenders') || '[]');
+                    if (!spamList.includes(email.from_email)) {
+                        spamList.push(email.from_email);
+                        localStorage.setItem('spamSenders', JSON.stringify(spamList));
+                    }
+                }
+
+                alert('Email marked as spam!');
+                await fetchEmails();
+                closeDetail();
+            } catch (error) {
+                console.error('Error marking as spam:', error);
+                alert('Failed to mark email as spam.');
+            }
+        }
+
+        // Block sender
+        function blockSender(senderEmail) {
+            if (!confirm(`Block all emails from ${senderEmail}?`)) {
+                return;
+            }
+
+            const blockedList = JSON.parse(localStorage.getItem('blockedSenders') || '[]');
+            if (!blockedList.includes(senderEmail)) {
+                blockedList.push(senderEmail);
+                localStorage.setItem('blockedSenders', JSON.stringify(blockedList));
+                alert(`${senderEmail} has been blocked. Future emails from this sender will be hidden.`);
+                
+                // Refresh email list to hide blocked emails
+                fetchEmails();
+                closeDetail();
+            } else {
+                alert('This sender is already blocked.');
+            }
+        }
+
+        // Delete email
+        async function deleteEmail(emailId) {
+            if (!confirm('Are you sure you want to delete this email?')) {
+                return;
+            }
+
+            try {
+                // Store deleted email ID in localStorage
+                const deletedList = JSON.parse(localStorage.getItem('deletedEmails') || '[]');
+                if (!deletedList.includes(emailId)) {
+                    deletedList.push(emailId);
+                    localStorage.setItem('deletedEmails', JSON.stringify(deletedList));
+                }
+
+                alert('Email deleted!');
+                await fetchEmails();
+                closeDetail();
+            } catch (error) {
+                console.error('Error deleting email:', error);
+                alert('Failed to delete email.');
+            }
+        }
+
+        // Filter out blocked and deleted emails
+        function filterBlockedAndDeleted(emailList) {
+            const blockedSenders = JSON.parse(localStorage.getItem('blockedSenders') || '[]');
+            const deletedEmails = JSON.parse(localStorage.getItem('deletedEmails') || '[]');
+            
+            return emailList.filter(email => 
+                !blockedSenders.includes(email.from_email) && 
+                !deletedEmails.includes(email.id)
+            );
+        }
+
+        // Show blocked senders management
+        function showBlockedSenders() {
+            const blockedList = JSON.parse(localStorage.getItem('blockedSenders') || '[]');
+            
+            if (blockedList.length === 0) {
+                alert('No blocked senders.');
+                return;
+            }
+
+            let message = 'Blocked Senders:\n\n';
+            blockedList.forEach((sender, index) => {
+                message += `${index + 1}. ${sender}\n`;
+            });
+            message += '\nEnter the number to unblock (or cancel to close):';
+
+            const input = prompt(message);
+            if (input) {
+                const index = parseInt(input) - 1;
+                if (index >= 0 && index < blockedList.length) {
+                    const unblocked = blockedList.splice(index, 1)[0];
+                    localStorage.setItem('blockedSenders', JSON.stringify(blockedList));
+                    alert(`${unblocked} has been unblocked.`);
+                    fetchEmails();
+                } else {
+                    alert('Invalid number.');
+                }
+            }
+        }
+
+        // Initialize on load
+        window.addEventListener('load', () => {
+            initFilters();
+            fetchEmails();
+        });
+    </script>
+</body>
+</html>
